@@ -46,19 +46,20 @@ app.post('/api/login', async (req, res) => {
 });
 
 // US.05 & US.07: Add Points & Update Tier
-app.post('/api/add-points', async (req, res) => {
+// This covers both potential names to avoid "404 Not Found" errors
+app.post(['/api/add-points', '/api/add-transaction'], async (req, res) => {
   const { phone, amount } = req.body;
   const user = await User.findOne({ phone });
   if (user) {
     const pointsEarned = Math.floor(amount / 10);
     user.totalPoints += pointsEarned;
     user.history.unshift({ amount, points: pointsEarned });
-    
     if (user.totalPoints >= 500) user.membershipTier = 'Gold';
-    
     await user.save();
     res.send(user);
-  } else { res.status(404).send("User not found"); }
+  } else { 
+    res.status(404).send({ error: "Customer not found" }); 
+  }
 });
 
 module.exports = app;
