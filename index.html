@@ -2,109 +2,123 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OmniStyle Loyalty System</title>
+    <title>OmniStyle Loyalty</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
-<body class="bg-slate-100 min-h-screen p-4 md:p-10">
-    <div class="max-w-md mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
-        <div class="bg-indigo-600 p-6 text-white text-center">
-            <h1 class="text-2xl font-bold">OmniStyle Rewards</h1>
-            <p class="text-indigo-100 text-sm">Experience Seamless Loyalty</p>
+<body class="bg-gray-100 min-h-screen">
+
+    <div id="auth-screen" class="max-w-md mx-auto mt-20 p-6 bg-white rounded-xl shadow-lg">
+        <h1 class="text-3xl font-bold text-center text-indigo-600 mb-6">OmniStyle</h1>
+        
+        <div class="flex mb-6 bg-gray-100 rounded-lg p-1">
+            <button onclick="toggleAuth('login')" id="tab-login" class="flex-1 py-2 rounded-md bg-white shadow-sm font-bold">Login</button>
+            <button onclick="toggleAuth('signup')" id="tab-signup" class="flex-1 py-2 rounded-md font-bold text-gray-500">Sign Up</button>
         </div>
 
-        <div class="flex border-b">
-            <button onclick="show('user')" id="btn-user" class="flex-1 py-3 text-sm font-semibold border-b-2 border-indigo-600 text-indigo-600">CUSTOMER APP</button>
-            <button onclick="show('staff')" id="btn-staff" class="flex-1 py-3 text-sm font-semibold text-gray-500">STAFF PORTAL</button>
+        <div id="signup-fields" class="hidden">
+            <input id="reg-name" placeholder="Full Name" class="w-full border p-3 rounded-lg mb-3">
         </div>
+        <input id="reg-phone" placeholder="Phone Number" class="w-full border p-3 rounded-lg mb-4">
+        
+        <button onclick="handleAuth()" id="auth-btn" class="w-full bg-indigo-600 text-white py-3 rounded-lg font-bold">Login to Account</button>
+        <p class="text-center mt-4 text-sm text-blue-500 cursor-pointer" onclick="switchView('staff')">Switch to Staff Portal</p>
+    </div>
 
-        <div class="p-6">
-            <div id="user-view" class="space-y-4">
-                <div id="reg-form">
-                    <label class="block text-sm font-medium text-gray-700">Full Name</label>
-                    <input id="u_name" type="text" class="w-full p-2 border rounded-lg mb-3">
-                    <label class="block text-sm font-medium text-gray-700">Registration Number</label>
-                    <input id="u_reg" type="text" placeholder="e.g. RA2311..." class="w-full p-2 border rounded-lg mb-4">
-                    <button onclick="register()" class="w-full bg-indigo-600 text-white py-2 rounded-lg font-bold hover:bg-indigo-700 transition">Join Loyalty Program</button>
-                </div>
-
-                <div id="profile-card" class="hidden text-center space-y-4">
-                    <div class="p-4 bg-indigo-50 rounded-xl border border-indigo-100">
-                        <p class="text-gray-500 text-xs uppercase tracking-widest">Membership Tier</p>
-                        <h2 id="disp-tier" class="text-2xl font-black text-indigo-700">SILVER</h2>
-                    </div>
-                    <div class="flex justify-center p-4 bg-white border-2 border-dashed rounded-lg">
-                        <div id="qrcode"></div>
-                    </div>
-                    <div>
-                        <p id="disp-name" class="font-bold text-lg"></p>
-                        <p id="disp-points" class="text-indigo-600 font-semibold">Points: 0</p>
-                    </div>
+    <div id="user-dash" class="hidden max-w-4xl mx-auto p-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="md:col-span-1 bg-white p-6 rounded-xl shadow-md text-center">
+                <div id="qrcode" class="flex justify-center mb-4"></div>
+                <h2 id="u-name" class="text-xl font-bold"></h2>
+                <p id="u-tier" class="text-indigo-600 font-black tracking-widest uppercase"></p>
+                <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                    <p class="text-sm text-gray-500">Total Points</p>
+                    <p id="u-points" class="text-3xl font-bold"></p>
                 </div>
             </div>
-
-            <div id="staff-view" class="hidden space-y-4">
-                <h3 class="font-bold text-gray-800">Scan & Update Points</h3>
-                <input id="s_reg" placeholder="Enter/Scan Reg Number" class="w-full p-2 border rounded-lg">
-                <input id="s_amt" type="number" placeholder="Bill Amount (INR)" class="w-full p-2 border rounded-lg">
-                <button onclick="addPoints()" class="w-full bg-orange-500 text-white py-2 rounded-lg font-bold">Confirm Transaction</button>
+            <div class="md:col-span-2 bg-white p-6 rounded-xl shadow-md">
+                <h3 class="font-bold border-b pb-2 mb-4">Recent Transactions</h3>
+                <div id="u-history" class="space-y-3 overflow-y-auto max-h-60"></div>
             </div>
         </div>
+        <button onclick="location.reload()" class="mt-6 text-gray-500 underline">Logout</button>
+    </div>
+
+    <div id="staff-dash" class="hidden max-w-md mx-auto mt-10 p-6 bg-white rounded-xl shadow-lg border-t-4 border-orange-500">
+        <h2 class="text-2xl font-bold mb-4">Staff Transaction Desk</h2>
+        <input id="s-phone" placeholder="Customer Phone" class="w-full border p-3 rounded-lg mb-3">
+        <input id="s-amt" type="number" placeholder="Bill Amount (INR)" class="w-full border p-3 rounded-lg mb-4">
+        <button onclick="processTransaction()" class="w-full bg-orange-500 text-white py-3 rounded-lg font-bold">Add Points</button>
+        <p class="text-center mt-4 text-sm text-blue-500 cursor-pointer" onclick="location.reload()">Back to Customer Login</p>
     </div>
 
     <script>
-        // !! REPLACE THIS WITH YOUR VERCEL DEPLOYMENT URL LATER !!
-        const API_URL = "https://omni-style-loyalty-system.vercel.app/"; 
+        const API = ""; // Keep empty for same-domain Vercel deployment
+        let currentMode = 'login';
 
-        function show(view) {
-            document.getElementById('user-view').classList.toggle('hidden', view !== 'user');
-            document.getElementById('staff-view').classList.toggle('hidden', view !== 'staff');
-            document.getElementById('btn-user').className = view === 'user' ? 'flex-1 py-3 text-sm font-semibold border-b-2 border-indigo-600 text-indigo-600' : 'flex-1 py-3 text-sm font-semibold text-gray-500';
-            document.getElementById('btn-staff').className = view === 'staff' ? 'flex-1 py-3 text-sm font-semibold border-b-2 border-orange-500 text-orange-500' : 'flex-1 py-3 text-sm font-semibold text-gray-500';
+        function toggleAuth(mode) {
+            currentMode = mode;
+            document.getElementById('signup-fields').classList.toggle('hidden', mode === 'login');
+            document.getElementById('auth-btn').innerText = mode === 'login' ? 'Login to Account' : 'Create Account';
+            document.getElementById('tab-login').className = mode === 'login' ? 'flex-1 py-2 rounded-md bg-white shadow-sm font-bold' : 'flex-1 py-2 rounded-md font-bold text-gray-500';
+            document.getElementById('tab-signup').className = mode === 'signup' ? 'flex-1 py-2 rounded-md bg-white shadow-sm font-bold' : 'flex-1 py-2 rounded-md font-bold text-gray-500';
         }
 
-        async function register() {
-            const name = document.getElementById('u_name').value;
-            const regNumber = document.getElementById('u_reg').value;
+        function switchView(view) {
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('staff-dash').classList.remove('hidden');
+        }
+
+        async function handleAuth() {
+            const phone = document.getElementById('reg-phone').value;
+            const name = document.getElementById('reg-name').value;
+            const endpoint = currentMode === 'login' ? '/api/login' : '/api/signup';
             
-            const res = await fetch(`${API_URL}/api/register`, {
+            const res = await fetch(endpoint, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ name, regNumber })
+                body: JSON.stringify({ phone, name })
             });
 
             if(res.ok) {
                 const user = await res.json();
-                renderProfile(user);
-            } else { alert("Registration failed. Number might be taken."); }
+                renderUserDashboard(user);
+            } else { alert("Error: Account not found or already exists."); }
         }
 
-        function renderProfile(user) {
-            document.getElementById('reg-form').classList.add('hidden');
-            document.getElementById('profile-card').classList.remove('hidden');
-            document.getElementById('disp-name').innerText = user.name;
-            document.getElementById('disp-tier').innerText = user.membershipTier.toUpperCase();
-            document.getElementById('disp-points').innerText = `Points: ${user.totalPoints}`;
+        function renderUserDashboard(user) {
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('user-dash').classList.remove('hidden');
+            document.getElementById('u-name').innerText = user.name;
+            document.getElementById('u-tier').innerText = user.membershipTier;
+            document.getElementById('u-points').innerText = user.totalPoints;
             
+            // QR Code
             document.getElementById("qrcode").innerHTML = "";
-            new QRCode(document.getElementById("qrcode"), { text: user.regNumber, width: 150, height: 150 });
+            new QRCode(document.getElementById("qrcode"), { text: user.phone, width: 150, height: 150 });
+
+            // History
+            const history = document.getElementById('u-history');
+            history.innerHTML = user.transactions.map(t => `
+                <div class="flex justify-between p-3 bg-gray-50 rounded-lg">
+                    <span>₹${t.amount} purchase</span>
+                    <span class="text-green-600 font-bold">+${t.pointsEarned} pts</span>
+                </div>
+            `).join('') || '<p class="text-gray-400">No transactions yet.</p>';
         }
 
-        async function addPoints() {
-            const regNumber = document.getElementById('s_reg').value;
-            const amount = document.getElementById('s_amt').value;
-
-            const res = await fetch(`${API_URL}/api/add-points`, {
+        async function processTransaction() {
+            const phone = document.getElementById('s-phone').value;
+            const amount = document.getElementById('s-amt').value;
+            const res = await fetch('/api/add-transaction', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ regNumber, amount })
+                body: JSON.stringify({ phone, amount })
             });
-
             if(res.ok) {
-                const user = await res.json();
-                alert(`Success! ${user.name} now has ${user.totalPoints} points. Tier: ${user.membershipTier}`);
-            } else { alert("User not found!"); }
+                alert("Transaction Successful! Points updated.");
+                document.getElementById('s-amt').value = '';
+            } else { alert("Customer not found."); }
         }
     </script>
 </body>
