@@ -2,143 +2,137 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>OmniStyle Loyalty Dashboard</title>
+    <title>OmniStyle Loyalty Ecosystem</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body class="bg-slate-50 min-h-screen font-sans">
 
-    <div id="auth-screen" class="max-w-md mx-auto pt-20 px-4">
-        <div class="bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
-            <h1 class="text-3xl font-black text-center text-indigo-600 mb-2">OmniStyle</h1>
-            <p class="text-center text-slate-400 mb-8 text-sm">Clothing Loyalty System</p>
-            
-            <div class="flex mb-6 bg-slate-100 p-1 rounded-xl">
-                <button onclick="setAuth('login')" id="t-login" class="flex-1 py-2 rounded-lg bg-white shadow-sm font-bold text-indigo-600">Login</button>
-                <button onclick="setAuth('signup')" id="t-signup" class="flex-1 py-2 rounded-lg font-bold text-slate-500">Sign Up</button>
-            </div>
-
-            <div id="signup-form" class="hidden mb-4">
-                <input id="u-name" type="text" placeholder="Full Name" class="w-full p-3 border rounded-xl bg-slate-50 focus:outline-indigo-500">
-            </div>
-            <input id="u-phone" type="text" placeholder="Phone Number" class="w-full p-3 border rounded-xl bg-slate-50 mb-6 focus:outline-indigo-500">
-            
-            <button onclick="handleAuth()" id="auth-btn" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 transition">Login Now</button>
-            <p class="text-center mt-6 text-indigo-500 cursor-pointer text-sm font-semibold" onclick="show('staff')">Staff Portal Access →</p>
+    <div id="landing" class="max-w-md mx-auto pt-40 px-4">
+        <h1 class="text-4xl font-black text-center text-indigo-600 mb-10 italic">OmniStyle</h1>
+        <div class="grid grid-cols-2 gap-4">
+            <button onclick="navTo('user')" class="bg-indigo-600 text-white p-6 rounded-3xl shadow-xl font-bold hover:scale-105 transition">CUSTOMER</button>
+            <button onclick="navTo('staff')" class="bg-orange-500 text-white p-6 rounded-3xl shadow-xl font-bold hover:scale-105 transition">STAFF</button>
         </div>
     </div>
 
-    <div id="user-dash" class="hidden max-w-5xl mx-auto p-6">
-        <header class="flex justify-between items-center mb-8">
-            <h2 class="text-2xl font-bold text-slate-800">My Rewards</h2>
-            <button onclick="location.reload()" class="text-slate-400 hover:text-red-500">Logout</button>
-        </header>
+    <div id="toast" class="hidden fixed top-5 right-5 bg-yellow-400 p-4 rounded-2xl shadow-2xl font-bold z-50 animate-bounce"></div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 text-center">
-                <div id="qrcode" class="flex justify-center mb-6"></div>
-                <h3 id="disp-name" class="text-xl font-bold text-slate-800"></h3>
-                <span id="disp-tier" class="inline-block mt-2 px-4 py-1 rounded-full bg-indigo-100 text-indigo-600 font-bold text-xs uppercase tracking-widest"></span>
-                <div class="mt-8 pt-8 border-t border-slate-50">
-                    <p class="text-slate-400 text-sm mb-1">Available Points</p>
-                    <p id="disp-pts" class="text-5xl font-black text-slate-800">0</p>
+    <div id="user-sec" class="hidden max-w-4xl mx-auto p-4">
+        <div id="u-auth" class="max-w-md mx-auto mt-10 bg-white p-8 rounded-3xl shadow-lg">
+            <h2 class="text-2xl font-bold mb-6">Customer Access</h2>
+            <div id="u-signup-box" class="hidden mb-4"><input id="u-name" placeholder="Name" class="w-full border p-3 rounded-xl mb-2"></div>
+            <input id="u-phone" placeholder="Phone Number" class="w-full border p-3 rounded-xl mb-4">
+            <button onclick="handleUAuth()" id="u-btn" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold">Login</button>
+            <p onclick="toggleU()" class="text-center mt-4 text-sm text-indigo-400 cursor-pointer">Switch Login/Signup</p>
+        </div>
+
+        <div id="u-dash" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
+            <div class="bg-white p-8 rounded-3xl shadow-lg text-center">
+                <div id="qrcode" class="flex justify-center mb-4"></div>
+                <h2 id="disp-name" class="text-xl font-bold"></h2>
+                <p id="disp-tier" class="text-indigo-500 font-bold uppercase text-xs"></p>
+                <p id="disp-pts" class="text-5xl font-black mt-4">0</p>
+                <button onclick="location.reload()" class="mt-8 text-slate-300 underline">Logout</button>
+            </div>
+            <div class="md:col-span-2 space-y-6">
+                <div class="bg-white p-6 rounded-3xl shadow-lg">
+                    <h3 class="font-bold mb-4">🎁 Rewards Menu</h3>
+                    <div id="r-menu" class="grid grid-cols-2 gap-3"></div>
+                </div>
+                <div class="bg-white p-6 rounded-3xl shadow-lg">
+                    <h3 class="font-bold mb-4">🕒 History</h3>
+                    <div id="u-hist" class="space-y-2 max-h-40 overflow-y-auto"></div>
                 </div>
             </div>
-
-            <div class="lg:col-span-2 bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
-                <h3 class="text-lg font-bold mb-6 text-slate-800">Transaction History</h3>
-                <div id="history-list" class="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-                    </div>
-            </div>
         </div>
     </div>
 
-    <div id="staff-dash" class="hidden max-w-md mx-auto pt-20 px-4">
-        <div class="bg-white p-8 rounded-2xl shadow-xl border-t-8 border-orange-500">
-            <h2 class="text-2xl font-bold mb-6 text-slate-800">Point Dispatcher</h2>
-            <input id="s-phone" placeholder="Customer Phone" class="w-full p-3 border rounded-xl mb-3 focus:outline-orange-500">
-            <input id="s-amt" type="number" placeholder="Bill Amount (INR)" class="w-full p-3 border rounded-xl mb-6 focus:outline-orange-500">
-            <button onclick="addPoints()" class="w-full bg-orange-500 text-white py-3 rounded-xl font-bold hover:bg-orange-600 transition">Update Points</button>
-            <p class="text-center mt-6 text-slate-400 cursor-pointer text-sm" onclick="location.reload()">← Back to Login</p>
+    <div id="staff-sec" class="hidden max-w-md mx-auto p-4">
+        <div id="s-auth" class="mt-10 bg-white p-8 rounded-3xl shadow-lg border-t-8 border-orange-500">
+            <h2 class="text-2xl font-bold mb-6">Staff Desk</h2>
+            <div id="s-signup-box" class="hidden mb-4"><input id="s-name" placeholder="Name" class="w-full border p-3 rounded-xl mb-2"></div>
+            <input id="s-id" placeholder="Staff ID" class="w-full border p-3 rounded-xl mb-3">
+            <input id="s-pass" type="password" placeholder="Password" class="w-full border p-3 rounded-xl mb-4">
+            <button onclick="handleSAuth()" id="s-btn" class="w-full bg-orange-500 text-white py-3 rounded-xl font-bold">Login</button>
+            <p onclick="toggleS()" class="text-center mt-4 text-sm text-orange-400 cursor-pointer">Register New Staff</p>
+        </div>
+
+        <div id="s-dash" class="hidden mt-10 bg-white p-8 rounded-3xl shadow-lg space-y-4">
+            <h2 class="font-bold text-lg">Transaction Entry</h2>
+            <input id="t-phone" placeholder="Customer Phone" class="w-full border p-3 rounded-xl">
+            <input id="t-amt" type="number" placeholder="Bill Amount" class="w-full border p-3 rounded-xl">
+            <button onclick="addPts()" class="w-full bg-orange-500 text-white py-3 rounded-xl font-bold">Add Points</button>
+            <hr>
+            <button onclick="redeem()" class="w-full bg-slate-800 text-white py-3 rounded-xl font-bold">Redeem Reward</button>
+            <button onclick="location.reload()" class="w-full text-slate-300">Exit Desk</button>
         </div>
     </div>
 
     <script>
-        const API = ""; 
-        let mode = 'login';
+        let uMode = 'login', sMode = 'login';
+        const REWARDS = [{n: "20% Discount", c: 200}, {n: "Free Bag", c: 500}];
 
-       function show(view) {
-    // Hide everything first
-    document.getElementById('auth-screen').classList.add('hidden');
-    document.getElementById('user-dash').classList.add('hidden');
-    document.getElementById('staff-dash').classList.add('hidden');
-
-    // Show the requested view
-    if(view === 'staff') {
-        document.getElementById('staff-dash').classList.remove('hidden');
-    } else {
-        document.getElementById('auth-screen').classList.remove('hidden');
-    }
-}
-
-        function setAuth(m) {
-            mode = m;
-            document.getElementById('signup-form').classList.toggle('hidden', m === 'login');
-            document.getElementById('auth-btn').innerText = m === 'login' ? 'Login Now' : 'Create Account';
-            document.getElementById('t-login').className = m === 'login' ? 'flex-1 py-2 rounded-lg bg-white shadow-sm font-bold text-indigo-600' : 'flex-1 py-2 rounded-lg font-bold text-slate-500';
-            document.getElementById('t-signup').className = m === 'signup' ? 'flex-1 py-2 rounded-lg bg-white shadow-sm font-bold text-indigo-600' : 'flex-1 py-2 rounded-lg font-bold text-slate-500';
+        function navTo(v) { 
+            document.getElementById('landing').classList.add('hidden');
+            document.getElementById(v + '-sec').classList.remove('hidden');
         }
 
-        async function handleAuth() {
+        function toggleU() { uMode = uMode === 'login' ? 'signup' : 'login'; document.getElementById('u-signup-box').classList.toggle('hidden'); }
+        function toggleS() { sMode = sMode === 'login' ? 'signup' : 'login'; document.getElementById('s-signup-box').classList.toggle('hidden'); }
+
+        async function handleUAuth() {
             const phone = document.getElementById('u-phone').value;
-            const name = document.getElementById('u-name').value;
-            const endpoint = mode === 'login' ? '/api/login' : '/api/signup';
-            
-            const res = await fetch(endpoint, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ phone, name })
+            const res = await fetch(uMode === 'login' ? '/api/login' : '/api/signup', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ phone, name: document.getElementById('u-name').value })
             });
-
-            if(res.ok) {
-                const user = await res.json();
-                loadUser(user);
-            } else { alert("User not found or phone already registered."); }
+            if(res.ok) renderUser(await res.json()); else alert("Error");
         }
 
-        function loadUser(user) {
-            document.getElementById('auth-screen').classList.add('hidden');
-            document.getElementById('user-dash').classList.remove('hidden');
+        async function renderUser(user) {
+            document.getElementById('u-auth').classList.add('hidden');
+            document.getElementById('u-dash').classList.remove('hidden');
             document.getElementById('disp-name').innerText = user.name;
-            document.getElementById('disp-tier').innerText = user.membershipTier;
             document.getElementById('disp-pts').innerText = user.totalPoints;
+            document.getElementById('disp-tier').innerText = user.membershipTier;
             
-            document.getElementById("qrcode").innerHTML = "";
-            new QRCode(document.getElementById("qrcode"), { text: user.phone, width: 160, height: 160 });
+            new QRCode(document.getElementById("qrcode"), { text: user.phone, width: 150, height: 150 });
+            
+            document.getElementById('r-menu').innerHTML = REWARDS.map(r => `<div class="p-3 border rounded-xl ${user.totalPoints >= r.c ? 'bg-green-50' : 'opacity-40'}"><b>${r.n}</b><br><small>${r.c} pts</small></div>`).join('');
+            document.getElementById('u-hist').innerHTML = user.history.map(h => `<div class="text-sm p-2 bg-slate-50 rounded flex justify-between"><span>${h.note}</span><b>${h.points}</b></div>`).join('');
 
-            document.getElementById('history-list').innerHTML = user.history.map(h => `
-                <div class="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                    <div>
-                        <p class="font-bold text-slate-800">Purchase: ₹${h.amount}</p>
-                        <p class="text-xs text-slate-400">${new Date(h.date).toLocaleDateString()}</p>
-                    </div>
-                    <span class="text-green-600 font-black">+${h.points} pts</span>
-                </div>
-            `).join('') || '<p class="text-center text-slate-300 py-10">No transactions found</p>';
+            const nRes = await fetch(`/api/notifications/${user.phone}`);
+            const alerts = await nRes.json();
+            if(alerts.length) { 
+                const t = document.getElementById('toast'); t.innerText = alerts[0]; t.classList.remove('hidden'); 
+                setTimeout(() => t.classList.add('hidden'), 5000);
+            }
         }
 
-        async function addPoints() {
-            const phone = document.getElementById('s-phone').value;
-            const amount = document.getElementById('s-amt').value;
-            const res = await fetch('/api/add-points', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ phone, amount })
+        async function handleSAuth() {
+            const res = await fetch(sMode === 'login' ? '/api/staff/login' : '/api/staff/signup', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ staffID: document.getElementById('s-id').value, password: document.getElementById('s-pass').value, name: document.getElementById('s-name').value })
             });
-            if(res.ok) {
-                alert("Transaction Processed Successfully!");
-                document.getElementById('s-amt').value = '';
-            } else { alert("Error: User not found."); }
+            if(res.ok) { document.getElementById('s-auth').classList.add('hidden'); document.getElementById('s-dash').classList.remove('hidden'); } else alert("Denied");
+        }
+
+        async function addPts() {
+            const res = await fetch('/api/add-points', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ phone: document.getElementById('t-phone').value, amount: document.getElementById('t-amt').value })
+            });
+            if(res.ok) alert("Success!"); else alert("User Missing");
+        }
+
+        async function redeem() {
+            const item = prompt("Item:"); const cost = parseInt(prompt("Cost:"));
+            const res = await fetch('/api/redeem', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ phone: document.getElementById('t-phone').value, cost, item })
+            });
+            if(res.ok) alert("Redeemed!"); else alert("Low Points");
         }
     </script>
 </body>
