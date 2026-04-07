@@ -7,51 +7,53 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 📱 Schema updated: Removed regNumber, added Phone as unique ID
+// User Schema (UML Structural Modeling)
 const userSchema = new mongoose.Schema({
   name: String,
   phone: { type: String, unique: true, required: true },
   totalPoints: { type: Number, default: 0 },
   membershipTier: { type: String, default: 'Silver' },
-  transactions: [{
+  history: [{
     amount: Number,
-    pointsEarned: Number,
+    points: Number,
     date: { type: Date, default: Date.now }
   }]
 });
 const User = mongoose.model('User', userSchema);
 
-mongoose.connect(process.env.MONGO_URI);
+// Connect using Vercel Environment Variable
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("DB Connected"))
+  .catch(err => console.error("DB Error:", err));
 
-// 🏠 Serve the Frontend
+// Serve Frontend
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
-// 📝 SIGNUP API
+// US.01: Signup
 app.post('/api/signup', async (req, res) => {
   try {
     const user = new User(req.body);
     await user.save();
     res.status(201).send(user);
-  } catch (e) { res.status(400).send({error: "Phone number already registered"}); }
+  } catch (e) { res.status(400).send({error: "Phone already exists"}); }
 });
 
-// 🔑 LOGIN API
+// US.01: Login
 app.post('/api/login', async (req, res) => {
   const user = await User.findOne({ phone: req.body.phone });
   if (user) res.send(user);
   else res.status(404).send({error: "User not found"});
 });
 
-// 💳 STAFF: ADD TRANSACTION (US.05)
-app.post('/api/add-transaction', async (req, res) => {
+// US.05 & US.07: Add Points & Update Tier
+app.post('/api/add-points', async (req, res) => {
   const { phone, amount } = req.body;
   const user = await User.findOne({ phone });
   if (user) {
-    const points = Math.floor(amount / 10);
-    user.totalPoints += points;
-    user.transactions.push({ amount, pointsEarned: points });
+    const pointsEarned = Math.floor(amount / 10);
+    user.totalPoints += pointsEarned;
+    user.history.unshift({ amount, points: pointsEarned });
     
-    // Tier Logic (US.07)
     if (user.totalPoints >= 500) user.membershipTier = 'Gold';
     
     await user.save();
