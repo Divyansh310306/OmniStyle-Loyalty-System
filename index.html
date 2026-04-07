@@ -67,11 +67,19 @@
         const API = ""; 
         let mode = 'login';
 
-        function show(view) {
-            document.querySelectorAll('>div').forEach(d => d.classList.add('hidden'));
-            if(view === 'staff') document.getElementById('staff-dash').classList.remove('hidden');
-            else document.getElementById('auth-screen').classList.remove('hidden');
-        }
+       function show(view) {
+    // Hide everything first
+    document.getElementById('auth-screen').classList.add('hidden');
+    document.getElementById('user-dash').classList.add('hidden');
+    document.getElementById('staff-dash').classList.add('hidden');
+
+    // Show the requested view
+    if(view === 'staff') {
+        document.getElementById('staff-dash').classList.remove('hidden');
+    } else {
+        document.getElementById('auth-screen').classList.remove('hidden');
+    }
+}
 
         function setAuth(m) {
             mode = m;
