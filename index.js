@@ -1,47 +1,62 @@
-const path = require('path'); // Add this line
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const path = require('path');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// MongoDB Schema
+// 📱 Schema updated: Removed regNumber, added Phone as unique ID
 const userSchema = new mongoose.Schema({
   name: String,
-  regNumber: { type: String, unique: true },
+  phone: { type: String, unique: true, required: true },
   totalPoints: { type: Number, default: 0 },
-  membershipTier: { type: String, default: 'Silver' }
+  membershipTier: { type: String, default: 'Silver' },
+  transactions: [{
+    amount: Number,
+    pointsEarned: Number,
+    date: { type: Date, default: Date.now }
+  }]
 });
 const User = mongoose.model('User', userSchema);
 
-// Connection logic for Vercel
 mongoose.connect(process.env.MONGO_URI);
 
-// API 1: Register User (US.01)
-app.post('/api/register', async (req, res) => {
+// 🏠 Serve the Frontend
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+
+// 📝 SIGNUP API
+app.post('/api/signup', async (req, res) => {
   try {
     const user = new User(req.body);
     await user.save();
     res.status(201).send(user);
-  } catch (e) { res.status(400).send({error: "User already exists"}); }
+  } catch (e) { res.status(400).send({error: "Phone number already registered"}); }
 });
 
-// API 2: Add Points & Update Tier (US.05 & US.07)
-app.post('/api/add-points', async (req, res) => {
-  const { regNumber, amount } = req.body;
-  const user = await User.findOne({ regNumber });
+// 🔑 LOGIN API
+app.post('/api/login', async (req, res) => {
+  const user = await User.findOne({ phone: req.body.phone });
+  if (user) res.send(user);
+  else res.status(404).send({error: "User not found"});
+});
+
+// 💳 STAFF: ADD TRANSACTION (US.05)
+app.post('/api/add-transaction', async (req, res) => {
+  const { phone, amount } = req.body;
+  const user = await User.findOne({ phone });
   if (user) {
-    user.totalPoints += Math.floor(amount / 10); // 1 point per $10 spent
+    const points = Math.floor(amount / 10);
+    user.totalPoints += points;
+    user.transactions.push({ amount, pointsEarned: points });
+    
+    // Tier Logic (US.07)
     if (user.totalPoints >= 500) user.membershipTier = 'Gold';
+    
     await user.save();
     res.send(user);
   } else { res.status(404).send("User not found"); }
 });
 
-// This tells Vercel to show your index.html when you visit the main URL
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
-module.exports = app; // Required for Vercel
+module.exports = app;
