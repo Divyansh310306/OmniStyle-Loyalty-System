@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OmniStyle Loyalty System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body class="bg-slate-100 min-h-screen p-4 md:p-10">
+    <div class="max-w-md mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div class="bg-indigo-600 p-6 text-white text-center">
+            <h1 class="text-2xl font-bold">OmniStyle Rewards</h1>
+            <p class="text-indigo-100 text-sm">Experience Seamless Loyalty</p>
+        </div>
+
+        <div class="flex border-b">
+            <button onclick="show('user')" id="btn-user" class="flex-1 py-3 text-sm font-semibold border-b-2 border-indigo-600 text-indigo-600">CUSTOMER APP</button>
+            <button onclick="show('staff')" id="btn-staff" class="flex-1 py-3 text-sm font-semibold text-gray-500">STAFF PORTAL</button>
+        </div>
+
+        <div class="p-6">
+            <div id="user-view" class="space-y-4">
+                <div id="reg-form">
+                    <label class="block text-sm font-medium text-gray-700">Full Name</label>
+                    <input id="u_name" type="text" class="w-full p-2 border rounded-lg mb-3">
+                    <label class="block text-sm font-medium text-gray-700">Registration Number</label>
+                    <input id="u_reg" type="text" placeholder="e.g. RA2311..." class="w-full p-2 border rounded-lg mb-4">
+                    <button onclick="register()" class="w-full bg-indigo-600 text-white py-2 rounded-lg font-bold hover:bg-indigo-700 transition">Join Loyalty Program</button>
+                </div>
+
+                <div id="profile-card" class="hidden text-center space-y-4">
+                    <div class="p-4 bg-indigo-50 rounded-xl border border-indigo-100">
+                        <p class="text-gray-500 text-xs uppercase tracking-widest">Membership Tier</p>
+                        <h2 id="disp-tier" class="text-2xl font-black text-indigo-700">SILVER</h2>
+                    </div>
+                    <div class="flex justify-center p-4 bg-white border-2 border-dashed rounded-lg">
+                        <div id="qrcode"></div>
+                    </div>
+                    <div>
+                        <p id="disp-name" class="font-bold text-lg"></p>
+                        <p id="disp-points" class="text-indigo-600 font-semibold">Points: 0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="staff-view" class="hidden space-y-4">
+                <h3 class="font-bold text-gray-800">Scan & Update Points</h3>
+                <input id="s_reg" placeholder="Enter/Scan Reg Number" class="w-full p-2 border rounded-lg">
+                <input id="s_amt" type="number" placeholder="Bill Amount (INR)" class="w-full p-2 border rounded-lg">
+                <button onclick="addPoints()" class="w-full bg-orange-500 text-white py-2 rounded-lg font-bold">Confirm Transaction</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // !! REPLACE THIS WITH YOUR VERCEL DEPLOYMENT URL LATER !!
+        const API_URL = "https://YOUR-PROJECT-NAME.vercel.app"; 
+
+        function show(view) {
+            document.getElementById('user-view').classList.toggle('hidden', view !== 'user');
+            document.getElementById('staff-view').classList.toggle('hidden', view !== 'staff');
+            document.getElementById('btn-user').className = view === 'user' ? 'flex-1 py-3 text-sm font-semibold border-b-2 border-indigo-600 text-indigo-600' : 'flex-1 py-3 text-sm font-semibold text-gray-500';
+            document.getElementById('btn-staff').className = view === 'staff' ? 'flex-1 py-3 text-sm font-semibold border-b-2 border-orange-500 text-orange-500' : 'flex-1 py-3 text-sm font-semibold text-gray-500';
+        }
+
+        async function register() {
+            const name = document.getElementById('u_name').value;
+            const regNumber = document.getElementById('u_reg').value;
+            
+            const res = await fetch(`${API_URL}/api/register`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ name, regNumber })
+            });
+
+            if(res.ok) {
+                const user = await res.json();
+                renderProfile(user);
+            } else { alert("Registration failed. Number might be taken."); }
+        }
+
+        function renderProfile(user) {
+            document.getElementById('reg-form').classList.add('hidden');
+            document.getElementById('profile-card').classList.remove('hidden');
+            document.getElementById('disp-name').innerText = user.name;
+            document.getElementById('disp-tier').innerText = user.membershipTier.toUpperCase();
+            document.getElementById('disp-points').innerText = `Points: ${user.totalPoints}`;
+            
+            document.getElementById("qrcode").innerHTML = "";
+            new QRCode(document.getElementById("qrcode"), { text: user.regNumber, width: 150, height: 150 });
+        }
+
+        async function addPoints() {
+            const regNumber = document.getElementById('s_reg').value;
+            const amount = document.getElementById('s_amt').value;
+
+            const res = await fetch(`${API_URL}/api/add-points`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ regNumber, amount })
+            });
+
+            if(res.ok) {
+                const user = await res.json();
+                alert(`Success! ${user.name} now has ${user.totalPoints} points. Tier: ${user.membershipTier}`);
+            } else { alert("User not found!"); }
+        }
+    </script>
+</body>
+</html>
