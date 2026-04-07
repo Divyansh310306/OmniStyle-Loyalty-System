@@ -1,3 +1,4 @@
+const path = require('path'); // Add this line
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -39,4 +40,8 @@ app.post('/api/add-points', async (req, res) => {
   } else { res.status(404).send("User not found"); }
 });
 
+// This tells Vercel to show your index.html when you visit the main URL
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
 module.exports = app; // Required for Vercel
