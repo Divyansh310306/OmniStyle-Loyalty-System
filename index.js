@@ -91,4 +91,36 @@ app.get('/api/notifications/:phone', async (req, res) => {
   res.send(alerts);
 });
 
+// --- ADD THIS TO YOUR ROUTES SECTION ---
+
+// US.11: Analytics API for Brand Manager
+app.get('/api/admin/stats', async (req, res) => {
+  try {
+    const totalUsers = await User.countDocuments();
+    const users = await User.find();
+    
+    const goldMembers = users.filter(u => u.membershipTier === 'Gold').length;
+    const silverMembers = totalUsers - goldMembers;
+    
+    const totalPointsIssued = users.reduce((acc, u) => acc + u.totalPoints, 0);
+    
+    // Calculate total revenue (sum of all transaction amounts in history)
+    const totalRevenue = users.reduce((acc, u) => {
+      return acc + u.history.reduce((hAcc, h) => hAcc + (h.amount || 0), 0);
+    }, 0);
+
+    res.send({
+      totalUsers,
+      goldMembers,
+      silverMembers,
+      totalPointsIssued,
+      totalRevenue
+    });
+  } catch (e) {
+    res.status(500).send(e);
+  }
+});
+
+// Existing module.exports and app.listen...
+
 module.exports = app;
