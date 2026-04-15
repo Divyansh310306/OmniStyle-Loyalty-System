@@ -38,10 +38,17 @@ app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 // --- CUSTOMER AUTH ---
 app.post('/api/signup', async (req, res) => {
   try {
-    const user = await new User(req.body).save();
+    const { phone, name } = req.body;
+    if (!name || !name.trim()) {
+      return res.status(400).send({ error: "Name is required" });
+    }
+    const user = await new User({ phone, name: name.trim() }).save();
     res.status(201).send(user);
   } catch (e) {
-    res.status(400).send({ error: "Phone already registered" });
+    if (e.code === 11000) {
+      return res.status(400).send({ error: "Phone already registered. Please sign in instead." });
+    }
+    res.status(500).send({ error: "Server error" });
   }
 });
 
