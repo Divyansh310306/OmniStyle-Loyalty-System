@@ -3,165 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OmniStyle | Loyalty Ecosystem</title>
+    <title>OmniStyle | Premium Loyalty</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
         .tier-gold { background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); }
         .tier-silver { background: linear-gradient(135deg, #94a3b8 0%, #475569 100%); }
-        @keyframes slide { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        .animate-slide { animation: slide 0.4s ease-out forwards; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .animate-slide { animation: slideIn 0.5s ease-out forwards; }
     </style>
 </head>
-<body class="bg-[#F8FAFC] min-h-screen">
+<body class="bg-[#F8FAFC] text-slate-900 min-h-screen">
 
-    <div id="notif-box" class="fixed top-6 right-6 z-[100] flex flex-col gap-3 w-80"></div>
+    <div id="notification-container" class="fixed top-6 right-6 z-[100] flex flex-col gap-3 w-80"></div>
 
-    <div id="landing" class="max-w-4xl mx-auto pt-32 px-6">
-        <h1 class="text-5xl font-extrabold text-indigo-600 mb-12 text-center italic tracking-tighter">OmniStyle</h1>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <button onclick="nav('user')" class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-200 hover:border-indigo-500 transition-all text-left">
-                <span class="text-xs font-bold text-indigo-500 uppercase">Customer</span>
-                <span class="block text-2xl font-bold mt-1">My Rewards</span>
+    <div id="landing" class="max-w-md mx-auto pt-32 px-6">
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-extrabold tracking-tighter text-indigo-600 mb-2">OmniStyle</h1>
+            <p class="text-slate-500 font-medium italic">Retail Excellence Redefined</p>
+        </div>
+        <div class="space-y-4">
+            <button onclick="navTo('user')" class="w-full bg-white border border-slate-200 p-6 rounded-[2rem] shadow-sm flex items-center justify-between hover:border-indigo-500 transition-all group">
+                <div class="text-left">
+                    <span class="block text-xs font-bold text-indigo-500 uppercase tracking-widest mb-1">Customer</span>
+                    <span class="text-xl font-bold">My Rewards</span>
+                </div>
+                <div class="bg-indigo-50 p-3 rounded-full group-hover:bg-indigo-600 group-hover:text-white transition-colors">→</div>
             </button>
-            <button onclick="nav('staff')" class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-200 hover:border-orange-500 transition-all text-left">
-                <span class="text-xs font-bold text-orange-500 uppercase">Employee</span>
-                <span class="block text-2xl font-bold mt-1">Service Desk</span>
-            </button>
-            <button onclick="loadAdmin()" class="bg-slate-900 p-8 rounded-[2.5rem] text-white shadow-xl hover:bg-black transition-all text-left">
-                <span class="text-xs font-bold text-slate-400 uppercase">Manager</span>
-                <span class="block text-2xl font-bold mt-1">Analytics</span>
+            <button onclick="navTo('staff')" class="w-full bg-white border border-slate-200 p-6 rounded-[2rem] shadow-sm flex items-center justify-between hover:border-orange-500 transition-all group">
+                <div class="text-left">
+                    <span class="block text-xs font-bold text-orange-500 uppercase tracking-widest mb-1">Employee</span>
+                    <span class="text-xl font-bold">Staff Portal</span>
+                </div>
+                <div class="bg-orange-50 p-3 rounded-full group-hover:bg-orange-600 group-hover:text-white transition-colors">→</div>
             </button>
         </div>
     </div>
 
     <div id="user-sec" class="hidden max-w-lg mx-auto p-6">
-        <div id="u-auth" class="bg-white p-10 rounded-[2.5rem] shadow-xl mt-10">
-            <h2 class="text-3xl font-bold mb-8 tracking-tight">Sign In</h2>
-            <div id="u-signup" class="hidden mb-4"><input id="u-name" placeholder="Full Name" class="w-full bg-slate-50 p-4 rounded-2xl border-0"></div>
-            <input id="u-phone" type="tel" placeholder="Phone Number" class="w-full bg-slate-50 p-4 rounded-2xl mb-6 border-0">
-            <button onclick="authU()" id="ubtn" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition">Access Dashboard</button>
-            <p onclick="toggleU()" class="text-center mt-6 text-sm text-slate-400 font-semibold cursor-pointer">Need an account? <span class="text-indigo-600">Join now</span></p>
+        <div id="u-auth" class="bg-white p-10 rounded-[2.5rem] shadow-xl shadow-slate-200/50 mt-10">
+            <h2 class="text-3xl font-bold mb-8">Welcome back</h2>
+            <div id="u-signup-box" class="hidden space-y-4 mb-4">
+                <input id="u-name" type="text" placeholder="Full Name" class="w-full bg-slate-50 border-0 p-4 rounded-2xl focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <input id="u-phone" type="tel" placeholder="Phone Number" class="w-full bg-slate-50 border-0 p-4 rounded-2xl mb-6 focus:ring-2 focus:ring-indigo-500">
+            <button onclick="handleUAuth()" id="u-btn" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all">Sign In</button>
+            <p onclick="toggleU()" class="text-center mt-6 text-sm font-semibold text-slate-400 cursor-pointer hover:text-indigo-600">New member? <span class="text-indigo-600">Create account</span></p>
         </div>
 
         <div id="u-dash" class="hidden space-y-6 mt-4">
-            <div id="tcard" class="tier-silver p-8 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden transition-all duration-700">
-                <p id="dtier" class="text-[10px] font-black uppercase tracking-[0.2em] opacity-80 mb-1">Silver Member</p>
-                <h2 id="dname" class="text-2xl font-bold mb-10 tracking-tight">Name</h2>
-                <div class="flex items-baseline gap-2"><span id="dpts" class="text-5xl font-black">0</span><span class="font-bold opacity-80 uppercase text-xs tracking-widest">Points</span></div>
+            <div id="tier-card" class="tier-silver p-8 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden">
+                <div class="relative z-10">
+                    <div class="flex justify-between items-start mb-12">
+                        <div>
+                            <p id="disp-tier" class="text-xs font-black uppercase tracking-[0.2em] opacity-80 mb-1">Silver Member</p>
+                            <h2 id="disp-name" class="text-2xl font-bold">Member Name</h2>
+                        </div>
+                        <button onclick="location.reload()" class="bg-white/20 p-2 rounded-full backdrop-blur-md hover:bg-white/40">✕</button>
+                    </div>
+                    <p class="text-sm opacity-80 mb-1">Total Balance</p>
+                    <div class="flex items-baseline gap-2">
+                        <span id="disp-pts" class="text-5xl font-black">0</span>
+                        <span class="text-xl font-bold opacity-80">Points</span>
+                    </div>
+                </div>
+                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
             </div>
-            <div class="bg-white p-8 rounded-[2.5rem] flex flex-col items-center shadow-sm border border-slate-100">
-                <div id="qrcode" class="p-2 bg-white rounded-xl border border-slate-50"></div>
-                <p class="text-[10px] text-slate-400 font-bold mt-4 uppercase tracking-widest">Scan at Checkout</p>
+
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 flex justify-center">
+                <div id="qrcode" class="p-2 border-4 border-slate-50 rounded-2xl"></div>
             </div>
+
             <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
                 <h3 class="font-bold text-lg mb-6">Recent Activity</h3>
-                <div id="uhist" class="space-y-3"></div>
+                <div id="u-hist" class="space-y-4"></div>
             </div>
-            <button onclick="location.reload()" class="w-full py-4 text-slate-300 font-bold text-sm tracking-widest">SIGN OUT</button>
         </div>
     </div>
 
     <div id="staff-sec" class="hidden max-w-md mx-auto p-6">
-        <div id="s-auth" class="bg-white p-10 rounded-[2.5rem] shadow-xl mt-10 border-t-8 border-orange-500">
-            <h2 class="text-3xl font-bold mb-8">Staff Desk</h2>
-            <div id="s-signup" class="hidden mb-4"><input id="s-name" placeholder="Full Name" class="w-full bg-slate-50 p-4 rounded-2xl border-0"></div>
-            <input id="s-id" placeholder="Staff ID" class="w-full bg-slate-50 p-4 rounded-2xl mb-3 border-0">
-            <input id="s-pass" type="password" placeholder="Password" class="w-full bg-slate-50 p-4 rounded-2xl mb-6 border-0">
-            <button onclick="authS()" id="sbtn" class="w-full bg-orange-500 text-white py-4 rounded-2xl font-bold shadow-lg shadow-orange-100">Login to Terminal</button>
-            <p onclick="toggleS()" class="text-center mt-6 text-sm text-slate-400 cursor-pointer">Register employee</p>
+        <div id="s-auth" class="bg-white p-10 rounded-[2.5rem] shadow-xl mt-10 border-t-[12px] border-orange-500">
+            <h2 class="text-3xl font-bold mb-2 text-slate-800">Staff Desk</h2>
+            <p class="text-slate-400 mb-8 text-sm">Secure authorization required</p>
+            <div id="s-signup-box" class="hidden mb-4"><input id="s-name" placeholder="Name" class="w-full bg-slate-50 border-0 p-4 rounded-2xl mb-2"></div>
+            <input id="s-id" placeholder="Staff ID" class="w-full bg-slate-50 border-0 p-4 rounded-2xl mb-3">
+            <input id="s-pass" type="password" placeholder="Password" class="w-full bg-slate-50 border-0 p-4 rounded-2xl mb-6">
+            <button onclick="handleSAuth()" id="s-btn" class="w-full bg-orange-500 text-white py-4 rounded-2xl font-bold shadow-lg shadow-orange-200">Login</button>
+            <p onclick="toggleS()" class="text-center mt-6 text-sm font-semibold text-slate-400 cursor-pointer">Register employee</p>
         </div>
-        <div id="s-dash" class="hidden mt-10 bg-white p-8 rounded-[2.5rem] shadow-lg space-y-4">
-            <h2 class="font-bold text-xl mb-4 text-slate-800">Transaction Desk</h2>
-            <input id="t-phone" placeholder="Customer Phone" class="w-full bg-slate-50 p-4 rounded-2xl">
-            <input id="t-amt" type="number" placeholder="Bill Amount (₹)" class="w-full bg-slate-50 p-4 rounded-2xl">
-            <button onclick="addPts()" class="w-full bg-orange-500 text-white py-4 rounded-2xl font-bold shadow-lg shadow-orange-100">Authorize Purchase</button>
-            <button onclick="redeem()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold">Deduct/Redeem Points</button>
-            <button onclick="location.reload()" class="w-full py-4 text-slate-300 font-bold">Sign Out</button>
-        </div>
-    </div>
 
-    <div id="manager-sec" class="hidden max-w-5xl mx-auto p-6 mt-10">
-        <div class="flex justify-between items-center mb-10 px-4">
-            <h2 class="text-3xl font-bold text-slate-800">Business Analytics</h2>
-            <button onclick="location.reload()" class="bg-slate-100 p-2 rounded-full hover:bg-slate-200">✕</button>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 px-4">
-            <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Total Users</p><h3 id="m-users" class="text-3xl font-black text-indigo-600">0</h3></div>
-            <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Revenue</p><h3 id="m-rev" class="text-3xl font-black text-green-600">₹0</h3></div>
-            <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Gold Tier</p><h3 id="m-gold" class="text-3xl font-black text-amber-500">0</h3></div>
-            <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Points Issued</p><h3 id="m-pts" class="text-3xl font-black text-slate-800">0</h3></div>
-        </div>
-        <div class="bg-indigo-900 p-10 rounded-[3.5rem] text-white shadow-2xl relative overflow-hidden mx-4">
-            <h3 class="font-bold mb-10 text-lg">Member Growth Distribution</h3>
-            <div class="flex items-end gap-6 h-40">
-                <div id="bar-s" class="bg-indigo-400/50 w-full rounded-t-2xl transition-all duration-1000 border-t-2 border-indigo-300" style="height: 0%"></div>
-                <div id="bar-g" class="bg-amber-400 w-full rounded-t-2xl transition-all duration-1000 shadow-[0_0_20px_rgba(251,191,36,0.4)]" style="height: 0%"></div>
+        <div id="s-dash" class="hidden mt-10 space-y-4">
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-lg border border-slate-100">
+                <h2 class="text-xl font-bold mb-6">Process Points</h2>
+                <input id="t-phone" placeholder="Customer Phone" class="w-full bg-slate-50 border-0 p-4 rounded-2xl mb-3">
+                <input id="t-amt" type="number" placeholder="Bill Amount (₹)" class="w-full bg-slate-50 border-0 p-4 rounded-2xl mb-6">
+                <button onclick="addPts()" class="w-full bg-orange-500 text-white py-4 rounded-2xl font-bold">Authorize Transaction</button>
             </div>
-            <div class="flex justify-between mt-6 text-[10px] font-black uppercase tracking-widest opacity-60"><span>Silver Tier</span><span>Gold Tier</span></div>
+            <button onclick="location.reload()" class="w-full py-4 text-slate-400 font-bold italic">Sign Out</button>
         </div>
     </div>
 
     <script>
-        let um = 'login', sm = 'login';
-        function nav(v) { document.getElementById('landing').classList.add('hidden'); document.getElementById(v + '-sec').classList.remove('hidden'); }
-        function toggleU() { um = um==='login'?'signup':'login'; document.getElementById('u-signup').classList.toggle('hidden'); document.getElementById('ubtn').innerText = um==='login'?'Access Dashboard':'Join Program'; }
-        function toggleS() { sm = sm==='login'?'signup':'login'; document.getElementById('s-signup').classList.toggle('hidden'); document.getElementById('sbtn').innerText = sm==='login'?'Login to Terminal':'Register Staff'; }
+        let uMode = 'login', sMode = 'login';
 
-        function notify(m, t='info') {
-            const b = document.getElementById('notif-box'), toast = document.createElement('div');
-            const c = { success: 'bg-green-600', gold: 'bg-amber-500 shadow-amber-200 shadow-lg', warn: 'bg-red-500' }[t] || 'bg-indigo-600';
-            toast.className = `${c} p-4 rounded-2xl shadow-xl flex animate-slide text-white font-bold text-sm justify-between items-center`;
-            toast.innerHTML = `<span>${m}</span><button onclick="this.parentElement.remove()" class="ml-4 opacity-50">✕</button>`;
-            b.appendChild(toast); setTimeout(() => { toast.style.opacity='0'; setTimeout(()=>toast.remove(), 500); }, 6000);
+        // 🚀 SMART NOTIFICATION ENGINE (US.10)
+        function notify(message, type = 'info') {
+            const container = document.getElementById('notification-container');
+            const toast = document.createElement('div');
+            const styles = {
+                success: 'bg-green-600',
+                gold: 'bg-amber-500 ring-4 ring-amber-200',
+                info: 'bg-indigo-600',
+                warn: 'bg-red-500'
+            };
+            
+            toast.className = `${styles[type] || styles.info} p-4 rounded-2xl shadow-2xl flex items-center justify-between animate-slide text-white font-bold text-sm`;
+            toast.innerHTML = `<span>${message}</span><button onclick="this.parentElement.remove()" class="ml-4 opacity-50 hover:opacity-100">✕</button>`;
+            
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 500);
+            }, 6000);
         }
 
-        async function authU() {
-            const phone = document.getElementById('u-phone').value;
-            const r = await fetch(um==='login'?'/api/login':'/api/signup', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ phone, name: document.getElementById('u-name').value }) });
-            if(r.ok) { renderU(await r.json()); notify("Successfully Authenticated", "success"); } else notify("Member not found", "warn");
+        function navTo(v) { 
+            document.getElementById('landing').classList.add('hidden');
+            document.getElementById(v + '-sec').classList.remove('hidden');
         }
 
-        function renderU(u) {
-            document.getElementById('u-auth').classList.add('hidden'); document.getElementById('u-dash').classList.remove('hidden');
-            document.getElementById('dname').innerText = u.name; document.getElementById('dpts').innerText = u.totalPoints;
-            document.getElementById('dtier').innerText = u.membershipTier + " Member";
-            if(u.membershipTier === 'Gold') document.getElementById('tcard').classList.replace('tier-silver', 'tier-gold');
-            document.getElementById("qrcode").innerHTML = ""; new QRCode(document.getElementById("qrcode"), { text: u.phone, width: 160, height: 160, colorDark: "#4338ca" });
-            document.getElementById('uhist').innerHTML = u.history.map(h => `<div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl flex justify-between items-center text-sm"><div class="font-bold text-slate-700">${h.note}<p class="text-[10px] text-slate-300 font-bold uppercase mt-1">${new Date(h.date).toLocaleDateString()}</p></div><b class="${h.points>0?'text-green-600':'text-red-500'} font-black text-lg">${h.points>0?'+':''}${h.points}</b></div>`).join('') || '<p class="text-center text-slate-300 py-6 italic font-bold">No Activity Yet</p>';
-            if(u.totalPoints >= 400 && u.membershipTier === 'Silver') setTimeout(()=>notify(`🚀 You're only ${500-u.totalPoints} points away from Gold Tier!`, "gold"), 1500);
+        function toggleU() { 
+            uMode = uMode === 'login' ? 'signup' : 'login'; 
+            document.getElementById('u-signup-box').classList.toggle('hidden'); 
+            document.getElementById('u-btn').innerText = uMode === 'login' ? 'Sign In' : 'Create Account';
         }
 
-        async function authS() {
-            const r = await fetch(sm==='login'?'/api/staff/login':'/api/staff/signup', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ staffID: document.getElementById('s-id').value, password: document.getElementById('s-pass').value, name: document.getElementById('s-name').value }) });
-            if(r.ok) { document.getElementById('s-auth').classList.add('hidden'); document.getElementById('s-dash').classList.remove('hidden'); notify("Staff Session Verified", "success"); } else notify("Invalid Access", "warn");
+        function toggleS() { 
+            sMode = sMode === 'login' ? 'signup' : 'login'; 
+            document.getElementById('s-signup-box').classList.toggle('hidden'); 
+            document.getElementById('s-btn').innerText = sMode === 'login' ? 'Login' : 'Register Staff';
+        }
+
+        async function handleUAuth() {
+            const res = await fetch(uMode === 'login' ? '/api/login' : '/api/signup', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ phone: document.getElementById('u-phone').value, name: document.getElementById('u-name').value })
+            });
+            if(res.ok) {
+                const user = await res.json();
+                renderUser(user);
+                notify(`Welcome, ${user.name}!`, 'success');
+            } else notify("Login Failed", 'warn');
+        }
+
+        function renderUser(user) {
+            document.getElementById('u-auth').classList.add('hidden');
+            document.getElementById('u-dash').classList.remove('hidden');
+            document.getElementById('disp-name').innerText = user.name;
+            document.getElementById('disp-pts').innerText = user.totalPoints;
+            document.getElementById('disp-tier').innerText = user.membershipTier + " Member";
+            
+            const card = document.getElementById('tier-card');
+            if(user.membershipTier === 'Gold') {
+                card.classList.replace('tier-silver', 'tier-gold');
+            }
+
+            new QRCode(document.getElementById("qrcode"), { text: user.phone, width: 180, height: 180, colorDark: "#4338ca" });
+            
+            document.getElementById('u-hist').innerHTML = user.history.map(h => `
+                <div class="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div>
+                        <p class="font-bold text-slate-700">${h.note || 'Store Purchase'}</p>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">${new Date(h.date).toLocaleDateString()}</p>
+                    </div>
+                    <span class="${h.points > 0 ? 'text-green-600' : 'text-red-500'} font-black">${h.points > 0 ? '+' : ''}${h.points}</span>
+                </div>
+            `).join('') || '<p class="text-center text-slate-300 py-4 italic">No activity yet</p>';
+
+            // US.10 Smart "Near-Miss" Notification
+            if(user.totalPoints >= 400 && user.membershipTier === 'Silver') {
+                setTimeout(() => notify(`🚀 You're only ${500 - user.totalPoints} points away from Gold Tier status!`, 'gold'), 2000);
+            }
+        }
+
+        async function handleSAuth() {
+            const res = await fetch(sMode === 'login' ? '/api/staff/login' : '/api/staff/signup', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ staffID: document.getElementById('s-id').value, password: document.getElementById('s-pass').value, name: document.getElementById('s-name').value })
+            });
+            if(res.ok) { 
+                document.getElementById('s-auth').classList.add('hidden'); 
+                document.getElementById('s-dash').classList.remove('hidden');
+                notify("Staff Session Active", 'info');
+            } else notify("Invalid Credentials", 'warn');
         }
 
         async function addPts() {
-            const r = await fetch('/api/add-points', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ phone: document.getElementById('t-phone').value, amount: document.getElementById('t-amt').value }) });
-            if(r.ok) { notify("Transaction Processed Successfully!", "success"); document.getElementById('t-amt').value = ''; } else notify("Customer Account Missing", "warn");
-        }
-
-        async function redeem() {
-            const item = prompt("Redemption Item (e.g. 50% Coupon):"), cost = parseInt(prompt("Point Cost:"));
-            if(!item || isNaN(cost)) return;
-            const r = await fetch('/api/redeem', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ phone: document.getElementById('t-phone').value, cost, item }) });
-            if(r.ok) notify(`Redeemed: ${item}`, "success"); else notify("Insufficient Point Balance", "warn");
-        }
-
-        async function loadAdmin() {
-            nav('manager'); const r = await fetch('/api/admin/stats'); const s = await r.json();
-            document.getElementById('m-users').innerText = s.totalUsers;
-            document.getElementById('m-rev').innerText = `₹${s.totalRevenue.toLocaleString()}`;
-            document.getElementById('m-gold').innerText = s.goldMembers;
-            document.getElementById('m-pts').innerText = s.totalPoints.toLocaleString();
-            setTimeout(() => { 
-                document.getElementById('bar-s').style.height = ((s.totalUsers-s.goldMembers)/s.totalUsers*100)+'%'; 
-                document.getElementById('bar-g').style.height = (s.goldMembers/s.totalUsers*100)+'%'; 
-            }, 300);
-            notify("Live Analytics Synced", "success");
+            const res = await fetch('/api/add-points', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ phone: document.getElementById('t-phone').value, amount: document.getElementById('t-amt').value })
+            });
+            if(res.ok) {
+                notify("Transaction Successful!", 'success');
+                document.getElementById('t-amt').value = '';
+            } else notify("Customer not found", 'warn');
         }
     </script>
 </body>
