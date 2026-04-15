@@ -6,157 +6,418 @@
     <title>OmniStyle | Premium Loyalty</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
         .tier-gold { background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); }
         .tier-silver { background: linear-gradient(135deg, #94a3b8 0%, #475569 100%); }
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         .animate-slide { animation: slideIn 0.5s ease-out forwards; }
+        @keyframes fadeUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .fade-up { animation: fadeUp 0.5s ease-out forwards; }
+        .tab-active { background: #4f46e5; color: white; }
+        .tab-inactive { background: #f1f5f9; color: #64748b; }
+        #qr-reader video { border-radius: 1rem; width: 100% !important; }
+        #qr-reader { border: none !important; padding: 0 !important; }
+        #qr-reader img { display: none; }
+        .bar-animate { transition: height 1s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .staff-tab-btn { transition: all 0.2s; }
+        .stat-card { transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-2px); }
+        ::-webkit-scrollbar { width: 4px; } 
+        ::-webkit-scrollbar-track { background: #f1f5f9; } 
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
 </head>
 <body class="bg-[#F8FAFC] text-slate-900 min-h-screen">
 
+    <!-- NOTIFICATION CONTAINER -->
     <div id="notification-container" class="fixed top-6 right-6 z-[100] flex flex-col gap-3 w-80"></div>
 
+    <!-- ═══════════════════════════════════════ LANDING ═══════════════════════════════════════ -->
     <div id="landing" class="max-w-md mx-auto pt-32 px-6">
         <div class="text-center mb-12">
             <h1 class="text-5xl font-extrabold tracking-tighter text-indigo-600 mb-2">OmniStyle</h1>
             <p class="text-slate-500 font-medium italic">Retail Excellence Redefined</p>
         </div>
         <div class="space-y-4">
-            <button onclick="navTo('user')" class="w-full bg-white border border-slate-200 p-6 rounded-[2rem] shadow-sm flex items-center justify-between hover:border-indigo-500 transition-all group">
+            <button onclick="navTo('user')" class="w-full bg-white border border-slate-200 p-6 rounded-[2rem] shadow-sm flex items-center justify-between hover:border-indigo-500 hover:shadow-indigo-100 hover:shadow-lg transition-all group">
                 <div class="text-left">
                     <span class="block text-xs font-bold text-indigo-500 uppercase tracking-widest mb-1">Customer</span>
                     <span class="text-xl font-bold">My Rewards</span>
                 </div>
-                <div class="bg-indigo-50 p-3 rounded-full group-hover:bg-indigo-600 group-hover:text-white transition-colors">→</div>
+                <div class="bg-indigo-50 p-3 rounded-full group-hover:bg-indigo-600 group-hover:text-white transition-colors text-indigo-600 font-bold">→</div>
             </button>
-            <button onclick="navTo('staff')" class="w-full bg-white border border-slate-200 p-6 rounded-[2rem] shadow-sm flex items-center justify-between hover:border-orange-500 transition-all group">
+            <button onclick="navTo('staff')" class="w-full bg-white border border-slate-200 p-6 rounded-[2rem] shadow-sm flex items-center justify-between hover:border-orange-500 hover:shadow-orange-100 hover:shadow-lg transition-all group">
                 <div class="text-left">
                     <span class="block text-xs font-bold text-orange-500 uppercase tracking-widest mb-1">Employee</span>
                     <span class="text-xl font-bold">Staff Portal</span>
                 </div>
-                <div class="bg-orange-50 p-3 rounded-full group-hover:bg-orange-600 group-hover:text-white transition-colors">→</div>
+                <div class="bg-orange-50 p-3 rounded-full group-hover:bg-orange-600 group-hover:text-white transition-colors text-orange-500 font-bold">→</div>
+            </button>
+            <button onclick="navTo('manager')" class="w-full bg-slate-900 border border-slate-800 p-6 rounded-[2rem] shadow-xl flex items-center justify-between hover:bg-black transition-all group">
+                <div class="text-left">
+                    <span class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Manager</span>
+                    <span class="text-xl font-bold text-white">Analytics</span>
+                </div>
+                <div class="bg-white/10 p-3 rounded-full group-hover:bg-white/20 transition-colors text-white font-bold">→</div>
             </button>
         </div>
     </div>
 
+    <!-- ═══════════════════════════════════════ CUSTOMER ═══════════════════════════════════════ -->
     <div id="user-sec" class="hidden max-w-lg mx-auto p-6">
         <div id="u-auth" class="bg-white p-10 rounded-[2.5rem] shadow-xl shadow-slate-200/50 mt-10">
-            <h2 class="text-3xl font-bold mb-8">Welcome back</h2>
-            <div id="u-signup-box" class="hidden space-y-4 mb-4">
-                <input id="u-name" type="text" placeholder="Full Name" class="w-full bg-slate-50 border-0 p-4 rounded-2xl focus:ring-2 focus:ring-indigo-500">
+            <h2 class="text-3xl font-bold mb-2">Welcome back</h2>
+            <p class="text-slate-400 text-sm mb-8">Sign in to view your rewards</p>
+            <div id="u-signup-box" class="hidden mb-4">
+                <input id="u-name" type="text" placeholder="Full Name" class="w-full bg-slate-50 border-0 p-4 rounded-2xl mb-3 focus:ring-2 focus:ring-indigo-400 outline-none">
             </div>
-            <input id="u-phone" type="tel" placeholder="Phone Number" class="w-full bg-slate-50 border-0 p-4 rounded-2xl mb-6 focus:ring-2 focus:ring-indigo-500">
+            <input id="u-phone" type="tel" placeholder="Phone Number" class="w-full bg-slate-50 border-0 p-4 rounded-2xl mb-6 focus:ring-2 focus:ring-indigo-400 outline-none">
             <button onclick="handleUAuth()" id="u-btn" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all">Sign In</button>
-            <p onclick="toggleU()" class="text-center mt-6 text-sm font-semibold text-slate-400 cursor-pointer hover:text-indigo-600">New member? <span class="text-indigo-600">Create account</span></p>
+            <p onclick="toggleU()" class="text-center mt-6 text-sm font-semibold text-slate-400 cursor-pointer hover:text-indigo-600 transition-colors">New member? <span class="text-indigo-600">Create account</span></p>
+            <button onclick="navTo('landing-back')" class="w-full mt-4 py-3 text-slate-300 font-bold text-sm">← Back</button>
         </div>
 
         <div id="u-dash" class="hidden space-y-6 mt-4">
-            <div id="tier-card" class="tier-silver p-8 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden">
+            <div id="tier-card" class="tier-silver p-8 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden fade-up">
                 <div class="relative z-10">
                     <div class="flex justify-between items-start mb-12">
                         <div>
                             <p id="disp-tier" class="text-xs font-black uppercase tracking-[0.2em] opacity-80 mb-1">Silver Member</p>
                             <h2 id="disp-name" class="text-2xl font-bold">Member Name</h2>
                         </div>
-                        <button onclick="location.reload()" class="bg-white/20 p-2 rounded-full backdrop-blur-md hover:bg-white/40">✕</button>
+                        <button onclick="location.reload()" class="bg-white/20 p-2 rounded-full hover:bg-white/40 transition-colors">✕</button>
                     </div>
-                    <p class="text-sm opacity-80 mb-1">Total Balance</p>
+                    <p class="text-sm opacity-70 mb-1">Total Balance</p>
                     <div class="flex items-baseline gap-2">
                         <span id="disp-pts" class="text-5xl font-black">0</span>
-                        <span class="text-xl font-bold opacity-80">Points</span>
+                        <span class="text-xl font-bold opacity-80">pts</span>
+                    </div>
+                    <div id="tier-progress-wrap" class="mt-6">
+                        <div class="flex justify-between text-xs opacity-70 mb-2">
+                            <span>Progress to Gold</span>
+                            <span id="progress-label">0 / 500</span>
+                        </div>
+                        <div class="w-full bg-white/20 rounded-full h-2">
+                            <div id="tier-progress-bar" class="bg-white rounded-full h-2 transition-all duration-1000" style="width:0%"></div>
+                        </div>
                     </div>
                 </div>
-                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+                <div class="absolute -right-10 -bottom-10 w-44 h-44 bg-white/10 rounded-full blur-3xl"></div>
+                <div class="absolute -left-6 -top-6 w-32 h-32 bg-white/5 rounded-full blur-2xl"></div>
             </div>
 
-            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 flex justify-center">
-                <div id="qrcode" class="p-2 border-4 border-slate-50 rounded-2xl"></div>
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col items-center">
+                <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Your Scan Code</p>
+                <div id="qrcode" class="p-3 border-4 border-slate-50 rounded-2xl"></div>
+                <p class="text-[10px] text-slate-300 font-bold mt-3 uppercase tracking-widest">Show at checkout</p>
             </div>
 
             <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
                 <h3 class="font-bold text-lg mb-6">Recent Activity</h3>
-                <div id="u-hist" class="space-y-4"></div>
+                <div id="u-hist" class="space-y-3"></div>
             </div>
         </div>
     </div>
 
+    <!-- ═══════════════════════════════════════ STAFF ═══════════════════════════════════════ -->
     <div id="staff-sec" class="hidden max-w-md mx-auto p-6">
-        <div id="s-auth" class="bg-white p-10 rounded-[2.5rem] shadow-xl mt-10 border-t-[12px] border-orange-500">
+        <div id="s-auth" class="bg-white p-10 rounded-[2.5rem] shadow-xl mt-10 border-t-[10px] border-orange-500">
             <h2 class="text-3xl font-bold mb-2 text-slate-800">Staff Desk</h2>
             <p class="text-slate-400 mb-8 text-sm">Secure authorization required</p>
-            <div id="s-signup-box" class="hidden mb-4"><input id="s-name" placeholder="Name" class="w-full bg-slate-50 border-0 p-4 rounded-2xl mb-2"></div>
-            <input id="s-id" placeholder="Staff ID" class="w-full bg-slate-50 border-0 p-4 rounded-2xl mb-3">
-            <input id="s-pass" type="password" placeholder="Password" class="w-full bg-slate-50 border-0 p-4 rounded-2xl mb-6">
-            <button onclick="handleSAuth()" id="s-btn" class="w-full bg-orange-500 text-white py-4 rounded-2xl font-bold shadow-lg shadow-orange-200">Login</button>
-            <p onclick="toggleS()" class="text-center mt-6 text-sm font-semibold text-slate-400 cursor-pointer">Register employee</p>
+            <div id="s-signup-box" class="hidden mb-4">
+                <input id="s-name" placeholder="Full Name" class="w-full bg-slate-50 border-0 p-4 rounded-2xl mb-3 outline-none">
+            </div>
+            <input id="s-id" placeholder="Staff ID" class="w-full bg-slate-50 border-0 p-4 rounded-2xl mb-3 outline-none">
+            <input id="s-pass" type="password" placeholder="Password" class="w-full bg-slate-50 border-0 p-4 rounded-2xl mb-6 outline-none">
+            <button onclick="handleSAuth()" id="s-btn" class="w-full bg-orange-500 text-white py-4 rounded-2xl font-bold shadow-lg shadow-orange-200 hover:bg-orange-600 transition-all">Login</button>
+            <p onclick="toggleS()" class="text-center mt-4 text-sm font-semibold text-slate-400 cursor-pointer hover:text-orange-500 transition-colors">Register new employee</p>
+            <button onclick="navTo('landing-back')" class="w-full mt-3 py-3 text-slate-300 font-bold text-sm">← Back</button>
         </div>
 
-        <div id="s-dash" class="hidden mt-10 space-y-4">
-            <div class="bg-white p-8 rounded-[2.5rem] shadow-lg border border-slate-100">
-                <h2 class="text-xl font-bold mb-6">Process Points</h2>
-                <input id="t-phone" placeholder="Customer Phone" class="w-full bg-slate-50 border-0 p-4 rounded-2xl mb-3">
-                <input id="t-amt" type="number" placeholder="Bill Amount (₹)" class="w-full bg-slate-50 border-0 p-4 rounded-2xl mb-6">
-                <button onclick="addPts()" class="w-full bg-orange-500 text-white py-4 rounded-2xl font-bold">Authorize Transaction</button>
+        <!-- STAFF DASHBOARD -->
+        <div id="s-dash" class="hidden mt-6 space-y-4 pb-10">
+            <!-- Staff Tab Bar -->
+            <div class="bg-white rounded-[1.5rem] p-2 flex gap-2 shadow-sm border border-slate-100">
+                <button onclick="switchStaffTab('scan')" id="tab-scan" class="staff-tab-btn flex-1 py-3 rounded-xl text-sm font-bold tab-active">📷 Scan QR</button>
+                <button onclick="switchStaffTab('points')" id="tab-points" class="staff-tab-btn flex-1 py-3 rounded-xl text-sm font-bold tab-inactive">✚ Points</button>
+                <button onclick="switchStaffTab('redeem')" id="tab-redeem" class="staff-tab-btn flex-1 py-3 rounded-xl text-sm font-bold tab-inactive">🎁 Redeem</button>
             </div>
-            <button onclick="location.reload()" class="w-full py-4 text-slate-400 font-bold italic">Sign Out</button>
+
+            <!-- CUSTOMER PROFILE (shown after QR scan or phone lookup) -->
+            <div id="s-customer-profile" class="hidden bg-indigo-50 border border-indigo-100 p-6 rounded-[2rem] fade-up">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-xs font-black text-indigo-400 uppercase tracking-widest">Active Customer</p>
+                        <h3 id="s-cust-name" class="text-xl font-bold text-slate-800 mt-1">—</h3>
+                        <p id="s-cust-phone" class="text-sm text-slate-400 font-semibold">—</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs font-black text-indigo-400 uppercase tracking-widest">Balance</p>
+                        <p id="s-cust-pts" class="text-3xl font-black text-indigo-600">0</p>
+                        <p class="text-xs text-slate-400 font-bold">points</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span id="s-cust-tier-badge" class="text-xs font-black uppercase tracking-widest bg-slate-200 text-slate-600 px-3 py-1 rounded-full">Silver</span>
+                    <button onclick="clearCustomer()" class="ml-auto text-xs text-slate-400 font-bold hover:text-red-500 transition-colors">Clear ✕</button>
+                </div>
+            </div>
+
+            <!-- TAB: QR SCAN -->
+            <div id="panel-scan" class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+                <h3 class="font-bold text-lg mb-2">Scan Customer QR</h3>
+                <p class="text-sm text-slate-400 mb-5">Point camera at customer's loyalty QR code</p>
+                <div id="qr-reader" class="rounded-2xl overflow-hidden mb-4 bg-slate-100" style="min-height:200px;"></div>
+                <button onclick="startScanner()" id="scan-btn" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold hover:bg-black transition-all">Start Camera</button>
+                <button onclick="stopScanner()" id="stop-btn" class="hidden w-full bg-red-500 text-white py-4 rounded-2xl font-bold mt-2 hover:bg-red-600 transition-all">Stop Camera</button>
+                <div class="mt-4 border-t border-slate-100 pt-4">
+                    <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Or enter phone manually</p>
+                    <div class="flex gap-2">
+                        <input id="s-manual-phone" placeholder="Phone number" class="flex-1 bg-slate-50 border-0 p-3 rounded-xl text-sm outline-none">
+                        <button onclick="lookupCustomer()" class="bg-indigo-600 text-white px-5 rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all">Find</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: ADD POINTS -->
+            <div id="panel-points" class="hidden bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+                <h3 class="font-bold text-lg mb-5">Add Points</h3>
+                <input id="t-phone" placeholder="Customer Phone (auto-filled from scan)" class="w-full bg-slate-50 border-0 p-4 rounded-2xl mb-3 outline-none text-sm">
+                <input id="t-amt" type="number" placeholder="Bill Amount (₹)" class="w-full bg-slate-50 border-0 p-4 rounded-2xl mb-2 outline-none">
+                <p class="text-xs text-slate-400 font-semibold mb-6 px-1">Points earned: <span id="pts-preview" class="text-indigo-600 font-black">0 pts</span> (₹10 = 1 point)</p>
+                <button onclick="addPts()" class="w-full bg-orange-500 text-white py-4 rounded-2xl font-bold shadow-lg shadow-orange-100 hover:bg-orange-600 transition-all">Authorize Transaction</button>
+            </div>
+
+            <!-- TAB: REDEEM -->
+            <div id="panel-redeem" class="hidden bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+                <h3 class="font-bold text-lg mb-2">Redeem Points</h3>
+                <p class="text-sm text-slate-400 mb-6">Apply a reward for the active customer</p>
+                <input id="r-phone" placeholder="Customer Phone (auto-filled from scan)" class="w-full bg-slate-50 border-0 p-4 rounded-2xl mb-3 outline-none text-sm">
+                
+                <!-- Preset Redemption Options -->
+                <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Select Reward</p>
+                <div class="grid grid-cols-2 gap-3 mb-5" id="reward-presets">
+                    <button onclick="selectReward(this, '10% Discount', 50)" class="reward-btn border-2 border-slate-100 p-4 rounded-2xl text-left hover:border-indigo-400 transition-all">
+                        <p class="font-black text-slate-800">10% Off</p>
+                        <p class="text-xs text-indigo-600 font-bold mt-1">50 pts</p>
+                    </button>
+                    <button onclick="selectReward(this, '20% Discount', 100)" class="reward-btn border-2 border-slate-100 p-4 rounded-2xl text-left hover:border-indigo-400 transition-all">
+                        <p class="font-black text-slate-800">20% Off</p>
+                        <p class="text-xs text-indigo-600 font-bold mt-1">100 pts</p>
+                    </button>
+                    <button onclick="selectReward(this, 'Free Accessory', 200)" class="reward-btn border-2 border-slate-100 p-4 rounded-2xl text-left hover:border-indigo-400 transition-all">
+                        <p class="font-black text-slate-800">Free Gift</p>
+                        <p class="text-xs text-indigo-600 font-bold mt-1">200 pts</p>
+                    </button>
+                    <button onclick="selectReward(this, '₹500 Voucher', 300)" class="reward-btn border-2 border-slate-100 p-4 rounded-2xl text-left hover:border-indigo-400 transition-all">
+                        <p class="font-black text-slate-800">₹500 Voucher</p>
+                        <p class="text-xs text-indigo-600 font-bold mt-1">300 pts</p>
+                    </button>
+                </div>
+
+                <div class="border-t border-slate-100 pt-4 mb-5">
+                    <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Or Custom Reward</p>
+                    <input id="r-item" placeholder="Reward name" class="w-full bg-slate-50 border-0 p-3 rounded-xl mb-2 outline-none text-sm">
+                    <input id="r-cost" type="number" placeholder="Point cost" class="w-full bg-slate-50 border-0 p-3 rounded-xl outline-none text-sm">
+                </div>
+
+                <div id="r-summary" class="hidden bg-indigo-50 border border-indigo-100 p-4 rounded-2xl mb-4">
+                    <p class="text-xs font-black text-indigo-400 uppercase tracking-widest mb-1">Selected Reward</p>
+                    <p id="r-summary-text" class="font-bold text-slate-800"></p>
+                </div>
+
+                <button onclick="redeemPts()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold hover:bg-black transition-all">Apply Redemption</button>
+            </div>
+
+            <button onclick="location.reload()" class="w-full py-4 text-slate-300 font-bold text-sm italic">Sign Out</button>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ MANAGER ═══════════════════════════════════════ -->
+    <div id="manager-sec" class="hidden max-w-5xl mx-auto p-6 pb-20 mt-6">
+        <div class="flex justify-between items-center mb-8 px-2">
+            <div>
+                <h2 class="text-3xl font-black text-slate-800 tracking-tight">Analytics</h2>
+                <p class="text-slate-400 text-sm font-semibold mt-1">Live business intelligence</p>
+            </div>
+            <div class="flex gap-3 items-center">
+                <button onclick="loadAnalytics()" class="bg-indigo-600 text-white px-5 py-2 rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all">↺ Refresh</button>
+                <button onclick="location.reload()" class="bg-slate-100 p-3 rounded-xl hover:bg-slate-200 transition-all font-bold text-slate-400">✕</button>
+            </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="stat-card bg-white p-6 rounded-[1.75rem] border border-slate-100 shadow-sm">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Total Members</p>
+                <h3 id="m-users" class="text-4xl font-black text-indigo-600">—</h3>
+                <p class="text-xs text-slate-300 font-bold mt-2">registered</p>
+            </div>
+            <div class="stat-card bg-white p-6 rounded-[1.75rem] border border-slate-100 shadow-sm">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Revenue</p>
+                <h3 id="m-rev" class="text-4xl font-black text-emerald-600">—</h3>
+                <p class="text-xs text-slate-300 font-bold mt-2">total billed</p>
+            </div>
+            <div class="stat-card bg-white p-6 rounded-[1.75rem] border border-slate-100 shadow-sm">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Gold Tier</p>
+                <h3 id="m-gold" class="text-4xl font-black text-amber-500">—</h3>
+                <p class="text-xs text-slate-300 font-bold mt-2">premium members</p>
+            </div>
+            <div class="stat-card bg-white p-6 rounded-[1.75rem] border border-slate-100 shadow-sm">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Points Issued</p>
+                <h3 id="m-pts" class="text-4xl font-black text-slate-700">—</h3>
+                <p class="text-xs text-slate-300 font-bold mt-2">outstanding</p>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <!-- Tier Distribution Chart -->
+            <div class="bg-slate-900 p-8 rounded-[2.5rem] text-white shadow-2xl">
+                <h3 class="font-bold mb-1 text-white">Membership Tiers</h3>
+                <p class="text-xs text-slate-400 font-semibold mb-8">Distribution breakdown</p>
+                <div class="flex items-end gap-6 h-36">
+                    <div class="flex-1 flex flex-col items-center gap-3">
+                        <span id="bar-s-pct" class="text-xs font-black text-slate-400">0%</span>
+                        <div class="w-full flex items-end justify-center" style="height:112px;">
+                            <div id="bar-s" class="bg-slate-500/60 w-full rounded-t-2xl bar-animate border-t-2 border-slate-400" style="height:0px;"></div>
+                        </div>
+                    </div>
+                    <div class="flex-1 flex flex-col items-center gap-3">
+                        <span id="bar-g-pct" class="text-xs font-black text-amber-400">0%</span>
+                        <div class="w-full flex items-end justify-center" style="height:112px;">
+                            <div id="bar-g" class="bg-amber-400 w-full rounded-t-2xl bar-animate shadow-[0_0_30px_rgba(251,191,36,0.5)]" style="height:0px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-between mt-4 text-[10px] font-black uppercase tracking-widest">
+                    <span class="text-slate-500">Silver Tier</span>
+                    <span class="text-amber-400">Gold Tier</span>
+                </div>
+            </div>
+
+            <!-- Revenue Per Member -->
+            <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                <h3 class="font-bold text-slate-800 mb-1">Key Metrics</h3>
+                <p class="text-xs text-slate-400 font-semibold mb-6">Performance indicators</p>
+                <div class="space-y-5">
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-xs font-black text-slate-500 uppercase tracking-widest">Avg. Revenue / Member</span>
+                            <span id="m-avg-rev" class="text-xs font-black text-slate-800">₹0</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-2">
+                            <div id="bar-avg-rev" class="bg-emerald-500 h-2 rounded-full transition-all duration-1000" style="width:0%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-xs font-black text-slate-500 uppercase tracking-widest">Gold Conversion Rate</span>
+                            <span id="m-conv" class="text-xs font-black text-slate-800">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-2">
+                            <div id="bar-conv" class="bg-amber-400 h-2 rounded-full transition-all duration-1000" style="width:0%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-xs font-black text-slate-500 uppercase tracking-widest">Avg. Points / Member</span>
+                            <span id="m-avg-pts" class="text-xs font-black text-slate-800">0</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-2">
+                            <div id="bar-avg-pts" class="bg-indigo-500 h-2 rounded-full transition-all duration-1000" style="width:0%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-xs font-black text-slate-500 uppercase tracking-widest">Points Redeemed</span>
+                            <span id="m-redeemed" class="text-xs font-black text-slate-800">0</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-2">
+                            <div id="bar-redeemed" class="bg-rose-400 h-2 rounded-full transition-all duration-1000" style="width:0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Members Table -->
+        <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
+            <div class="p-8 pb-4">
+                <h3 class="font-bold text-lg text-slate-800">Top Members</h3>
+                <p class="text-xs text-slate-400 font-semibold mt-1">Highest point holders</p>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-t border-slate-100">
+                            <th class="text-left text-[10px] font-black text-slate-400 uppercase tracking-widest px-8 py-4">Member</th>
+                            <th class="text-left text-[10px] font-black text-slate-400 uppercase tracking-widest px-4 py-4">Phone</th>
+                            <th class="text-left text-[10px] font-black text-slate-400 uppercase tracking-widest px-4 py-4">Tier</th>
+                            <th class="text-right text-[10px] font-black text-slate-400 uppercase tracking-widest px-8 py-4">Points</th>
+                        </tr>
+                    </thead>
+                    <tbody id="m-top-members" class="divide-y divide-slate-50">
+                        <tr><td colspan="4" class="text-center py-10 text-slate-300 font-bold italic">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
     <script>
         let uMode = 'login', sMode = 'login';
+        let activeCustomer = null;
+        let html5Scanner = null;
+        let selectedRewardItem = null, selectedRewardCost = null;
 
-        // 🚀 SMART NOTIFICATION ENGINE (US.10)
+        // ── NAVIGATION ──
+        function navTo(v) {
+            if (v === 'landing-back') { location.reload(); return; }
+            document.getElementById('landing').classList.add('hidden');
+            document.getElementById(v + '-sec').classList.remove('hidden');
+            if (v === 'manager') loadAnalytics();
+        }
+
+        // ── NOTIFICATIONS ──
         function notify(message, type = 'info') {
             const container = document.getElementById('notification-container');
             const toast = document.createElement('div');
-            const styles = {
-                success: 'bg-green-600',
-                gold: 'bg-amber-500 ring-4 ring-amber-200',
-                info: 'bg-indigo-600',
-                warn: 'bg-red-500'
-            };
-            
+            const styles = { success: 'bg-green-600', gold: 'bg-amber-500 ring-4 ring-amber-200', info: 'bg-indigo-600', warn: 'bg-red-500' };
             toast.className = `${styles[type] || styles.info} p-4 rounded-2xl shadow-2xl flex items-center justify-between animate-slide text-white font-bold text-sm`;
             toast.innerHTML = `<span>${message}</span><button onclick="this.parentElement.remove()" class="ml-4 opacity-50 hover:opacity-100">✕</button>`;
-            
             container.appendChild(toast);
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                setTimeout(() => toast.remove(), 500);
-            }, 6000);
+            setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.5s'; setTimeout(() => toast.remove(), 500); }, 6000);
         }
 
-        function navTo(v) { 
-            document.getElementById('landing').classList.add('hidden');
-            document.getElementById(v + '-sec').classList.remove('hidden');
-        }
-
-        function toggleU() { 
-            uMode = uMode === 'login' ? 'signup' : 'login'; 
-            document.getElementById('u-signup-box').classList.toggle('hidden'); 
+        // ── TOGGLE AUTH MODES ──
+        function toggleU() {
+            uMode = uMode === 'login' ? 'signup' : 'login';
+            document.getElementById('u-signup-box').classList.toggle('hidden');
             document.getElementById('u-btn').innerText = uMode === 'login' ? 'Sign In' : 'Create Account';
         }
-
-        function toggleS() { 
-            sMode = sMode === 'login' ? 'signup' : 'login'; 
-            document.getElementById('s-signup-box').classList.toggle('hidden'); 
+        function toggleS() {
+            sMode = sMode === 'login' ? 'signup' : 'login';
+            document.getElementById('s-signup-box').classList.toggle('hidden');
             document.getElementById('s-btn').innerText = sMode === 'login' ? 'Login' : 'Register Staff';
         }
 
+        // ── CUSTOMER AUTH ──
         async function handleUAuth() {
-            const res = await fetch(uMode === 'login' ? '/api/login' : '/api/signup', {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ phone: document.getElementById('u-phone').value, name: document.getElementById('u-name').value })
-            });
-            if(res.ok) {
-                const user = await res.json();
-                renderUser(user);
-                notify(`Welcome, ${user.name}!`, 'success');
-            } else notify("Login Failed", 'warn');
+            const phone = document.getElementById('u-phone').value.trim();
+            const name = document.getElementById('u-name').value.trim();
+            if (!phone) { notify("Please enter your phone number", "warn"); return; }
+            try {
+                const res = await fetch(uMode === 'login' ? '/api/login' : '/api/signup', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ phone, name })
+                });
+                if (res.ok) { const user = await res.json(); renderUser(user); notify(`Welcome, ${user.name}!`, 'success'); }
+                else { const err = await res.json(); notify(err.error || "Authentication failed", 'warn'); }
+            } catch(e) { notify("Connection error", 'warn'); }
         }
 
         function renderUser(user) {
@@ -165,51 +426,276 @@
             document.getElementById('disp-name').innerText = user.name;
             document.getElementById('disp-pts').innerText = user.totalPoints;
             document.getElementById('disp-tier').innerText = user.membershipTier + " Member";
-            
+
+            const pct = Math.min((user.totalPoints / 500) * 100, 100);
+            document.getElementById('tier-progress-bar').style.width = pct + '%';
+            document.getElementById('progress-label').innerText = `${user.totalPoints} / 500`;
+
             const card = document.getElementById('tier-card');
-            if(user.membershipTier === 'Gold') {
+            if (user.membershipTier === 'Gold') {
                 card.classList.replace('tier-silver', 'tier-gold');
+                document.getElementById('tier-progress-wrap').classList.add('hidden');
             }
 
-            new QRCode(document.getElementById("qrcode"), { text: user.phone, width: 180, height: 180, colorDark: "#4338ca" });
-            
-            document.getElementById('u-hist').innerHTML = user.history.map(h => `
-                <div class="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                    <div>
-                        <p class="font-bold text-slate-700">${h.note || 'Store Purchase'}</p>
-                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">${new Date(h.date).toLocaleDateString()}</p>
-                    </div>
-                    <span class="${h.points > 0 ? 'text-green-600' : 'text-red-500'} font-black">${h.points > 0 ? '+' : ''}${h.points}</span>
-                </div>
-            `).join('') || '<p class="text-center text-slate-300 py-4 italic">No activity yet</p>';
+            document.getElementById('qrcode').innerHTML = '';
+            new QRCode(document.getElementById("qrcode"), { text: user.phone, width: 180, height: 180, colorDark: "#4338ca", colorLight: "#ffffff" });
 
-            // US.10 Smart "Near-Miss" Notification
-            if(user.totalPoints >= 400 && user.membershipTier === 'Silver') {
-                setTimeout(() => notify(`🚀 You're only ${500 - user.totalPoints} points away from Gold Tier status!`, 'gold'), 2000);
+            document.getElementById('u-hist').innerHTML = user.history.length
+                ? user.history.slice(0, 8).map(h => `
+                    <div class="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                        <div>
+                            <p class="font-bold text-slate-700 text-sm">${h.note || 'Store Purchase'}</p>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">${new Date(h.date).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'})}</p>
+                        </div>
+                        <span class="font-black text-lg ${h.points > 0 ? 'text-green-600' : 'text-red-500'}">${h.points > 0 ? '+' : ''}${h.points}</span>
+                    </div>`).join('')
+                : '<p class="text-center text-slate-300 py-6 italic font-bold">No activity yet</p>';
+
+            if (user.totalPoints >= 400 && user.membershipTier === 'Silver') {
+                setTimeout(() => notify(`🚀 Only ${500 - user.totalPoints} pts away from Gold Tier!`, 'gold'), 2000);
             }
         }
 
+        // ── STAFF AUTH ──
         async function handleSAuth() {
-            const res = await fetch(sMode === 'login' ? '/api/staff/login' : '/api/staff/signup', {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ staffID: document.getElementById('s-id').value, password: document.getElementById('s-pass').value, name: document.getElementById('s-name').value })
-            });
-            if(res.ok) { 
-                document.getElementById('s-auth').classList.add('hidden'); 
-                document.getElementById('s-dash').classList.remove('hidden');
-                notify("Staff Session Active", 'info');
-            } else notify("Invalid Credentials", 'warn');
+            const staffID = document.getElementById('s-id').value.trim();
+            const password = document.getElementById('s-pass').value;
+            const name = document.getElementById('s-name').value.trim();
+            if (!staffID || !password) { notify("Fill in all fields", "warn"); return; }
+            try {
+                const res = await fetch(sMode === 'login' ? '/api/staff/login' : '/api/staff/signup', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ staffID, password, name })
+                });
+                if (res.ok) {
+                    document.getElementById('s-auth').classList.add('hidden');
+                    document.getElementById('s-dash').classList.remove('hidden');
+                    notify("Staff session active", 'info');
+                } else notify("Invalid credentials", 'warn');
+            } catch(e) { notify("Connection error", 'warn'); }
         }
 
-        async function addPts() {
-            const res = await fetch('/api/add-points', {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ phone: document.getElementById('t-phone').value, amount: document.getElementById('t-amt').value })
+        // ── STAFF TABS ──
+        function switchStaffTab(tab) {
+            ['scan','points','redeem'].forEach(t => {
+                document.getElementById('tab-' + t).className = `staff-tab-btn flex-1 py-3 rounded-xl text-sm font-bold ${t === tab ? 'tab-active' : 'tab-inactive'}`;
+                document.getElementById('panel-' + t).classList.toggle('hidden', t !== tab);
             });
-            if(res.ok) {
-                notify("Transaction Successful!", 'success');
-                document.getElementById('t-amt').value = '';
-            } else notify("Customer not found", 'warn');
+            if (tab !== 'scan') stopScanner();
+        }
+
+        // ── QR SCANNER ──
+        async function startScanner() {
+            document.getElementById('scan-btn').classList.add('hidden');
+            document.getElementById('stop-btn').classList.remove('hidden');
+            try {
+                html5Scanner = new Html5Qrcode("qr-reader");
+                await html5Scanner.start(
+                    { facingMode: "environment" },
+                    { fps: 10, qrbox: { width: 220, height: 220 } },
+                    async (decodedText) => {
+                        await stopScanner();
+                        notify("QR Scanned!", "success");
+                        await lookupByPhone(decodedText.trim());
+                    },
+                    () => {}
+                );
+            } catch(e) {
+                notify("Camera access denied or unavailable", "warn");
+                document.getElementById('scan-btn').classList.remove('hidden');
+                document.getElementById('stop-btn').classList.add('hidden');
+            }
+        }
+
+        async function stopScanner() {
+            document.getElementById('scan-btn').classList.remove('hidden');
+            document.getElementById('stop-btn').classList.add('hidden');
+            if (html5Scanner) {
+                try { await html5Scanner.stop(); html5Scanner.clear(); } catch(e) {}
+                html5Scanner = null;
+            }
+        }
+
+        async function lookupCustomer() {
+            const phone = document.getElementById('s-manual-phone').value.trim();
+            if (!phone) { notify("Enter a phone number", "warn"); return; }
+            await lookupByPhone(phone);
+        }
+
+        async function lookupByPhone(phone) {
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ phone })
+                });
+                if (res.ok) {
+                    activeCustomer = await res.json();
+                    showCustomerProfile(activeCustomer);
+                    notify(`Loaded: ${activeCustomer.name}`, 'success');
+                } else notify("Customer not found", 'warn');
+            } catch(e) { notify("Connection error", 'warn'); }
+        }
+
+        function showCustomerProfile(user) {
+            activeCustomer = user;
+            document.getElementById('s-cust-name').innerText = user.name;
+            document.getElementById('s-cust-phone').innerText = user.phone;
+            document.getElementById('s-cust-pts').innerText = user.totalPoints;
+            const badge = document.getElementById('s-cust-tier-badge');
+            badge.innerText = user.membershipTier;
+            badge.className = `text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full ${user.membershipTier === 'Gold' ? 'bg-amber-100 text-amber-600' : 'bg-slate-200 text-slate-600'}`;
+            document.getElementById('s-customer-profile').classList.remove('hidden');
+            // Auto-fill phone into all inputs
+            document.getElementById('t-phone').value = user.phone;
+            document.getElementById('r-phone').value = user.phone;
+        }
+
+        function clearCustomer() {
+            activeCustomer = null;
+            document.getElementById('s-customer-profile').classList.add('hidden');
+            document.getElementById('t-phone').value = '';
+            document.getElementById('r-phone').value = '';
+        }
+
+        // ── POINTS PREVIEW ──
+        document.addEventListener('DOMContentLoaded', () => {
+            const amtInput = document.getElementById('t-amt');
+            if (amtInput) {
+                amtInput.addEventListener('input', () => {
+                    const pts = Math.floor((parseFloat(amtInput.value) || 0) / 10);
+                    document.getElementById('pts-preview').innerText = pts + ' pts';
+                });
+            }
+        });
+
+        // ── ADD POINTS ──
+        async function addPts() {
+            const phone = document.getElementById('t-phone').value.trim();
+            const amount = document.getElementById('t-amt').value;
+            if (!phone || !amount) { notify("Fill in customer phone and bill amount", "warn"); return; }
+            try {
+                const res = await fetch('/api/add-points', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ phone, amount })
+                });
+                if (res.ok) {
+                    const updated = await res.json();
+                    notify(`✅ +${Math.floor(amount/10)} pts added for ${updated.name}`, 'success');
+                    document.getElementById('t-amt').value = '';
+                    document.getElementById('pts-preview').innerText = '0 pts';
+                    if (activeCustomer && activeCustomer.phone === phone) showCustomerProfile(updated);
+                    if (updated.membershipTier === 'Gold' && updated.history.length === 1) {
+                        setTimeout(() => notify("🏆 Customer upgraded to Gold Tier!", "gold"), 1000);
+                    }
+                } else notify("Customer not found", 'warn');
+            } catch(e) { notify("Connection error", 'warn'); }
+        }
+
+        // ── REWARD SELECTION ──
+        function selectReward(btn, item, cost) {
+            document.querySelectorAll('.reward-btn').forEach(b => b.classList.remove('border-indigo-500', 'bg-indigo-50'));
+            btn.classList.add('border-indigo-500', 'bg-indigo-50');
+            selectedRewardItem = item;
+            selectedRewardCost = cost;
+            document.getElementById('r-item').value = '';
+            document.getElementById('r-cost').value = '';
+            document.getElementById('r-summary').classList.remove('hidden');
+            document.getElementById('r-summary-text').innerText = `${item} — ${cost} points`;
+        }
+
+        // ── REDEEM POINTS ──
+        async function redeemPts() {
+            const phone = document.getElementById('r-phone').value.trim();
+            const customItem = document.getElementById('r-item').value.trim();
+            const customCost = parseInt(document.getElementById('r-cost').value);
+
+            const item = customItem || selectedRewardItem;
+            const cost = customItem ? customCost : selectedRewardCost;
+
+            if (!phone) { notify("Customer phone is required", "warn"); return; }
+            if (!item || !cost) { notify("Select or enter a reward", "warn"); return; }
+            if (isNaN(cost) || cost <= 0) { notify("Invalid point cost", "warn"); return; }
+
+            try {
+                const res = await fetch('/api/redeem', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ phone, cost, item })
+                });
+                if (res.ok) {
+                    const updated = await res.json();
+                    notify(`🎁 Redeemed: ${item} (${cost} pts)`, 'success');
+                    selectedRewardItem = null; selectedRewardCost = null;
+                    document.querySelectorAll('.reward-btn').forEach(b => b.classList.remove('border-indigo-500', 'bg-indigo-50'));
+                    document.getElementById('r-summary').classList.add('hidden');
+                    document.getElementById('r-item').value = '';
+                    document.getElementById('r-cost').value = '';
+                    if (activeCustomer && activeCustomer.phone === phone) showCustomerProfile(updated);
+                } else notify("Insufficient points or customer not found", 'warn');
+            } catch(e) { notify("Connection error", 'warn'); }
+        }
+
+        // ── ANALYTICS ──
+        async function loadAnalytics() {
+            try {
+                const res = await fetch('/api/admin/stats');
+                if (!res.ok) { notify("Failed to load analytics", "warn"); return; }
+                const s = await res.json();
+
+                document.getElementById('m-users').innerText = s.totalUsers || 0;
+                document.getElementById('m-rev').innerText = `₹${(s.totalRevenue || 0).toLocaleString('en-IN')}`;
+                document.getElementById('m-gold').innerText = s.goldMembers || 0;
+                document.getElementById('m-pts').innerText = (s.totalPoints || 0).toLocaleString('en-IN');
+
+                const total = s.totalUsers || 1;
+                const goldPct = Math.round((s.goldMembers / total) * 100);
+                const silverPct = 100 - goldPct;
+
+                setTimeout(() => {
+                    document.getElementById('bar-s').style.height = Math.max(silverPct, 4) + 'px';
+                    document.getElementById('bar-g').style.height = Math.max(goldPct, 4) + 'px';
+                    document.getElementById('bar-s-pct').innerText = silverPct + '%';
+                    document.getElementById('bar-g-pct').innerText = goldPct + '%';
+                }, 300);
+
+                // Computed metrics
+                const avgRev = total > 0 ? Math.round(s.totalRevenue / total) : 0;
+                const convRate = total > 0 ? Math.round((s.goldMembers / total) * 100) : 0;
+                const avgPts = total > 0 ? Math.round(s.totalPoints / total) : 0;
+
+                document.getElementById('m-avg-rev').innerText = `₹${avgRev.toLocaleString('en-IN')}`;
+                document.getElementById('m-conv').innerText = convRate + '%';
+                document.getElementById('m-avg-pts').innerText = avgPts;
+                document.getElementById('m-redeemed').innerText = (s.totalRedeemed || 0).toLocaleString('en-IN');
+
+                setTimeout(() => {
+                    document.getElementById('bar-avg-rev').style.width = Math.min(avgRev / 500 * 100, 100) + '%';
+                    document.getElementById('bar-conv').style.width = convRate + '%';
+                    document.getElementById('bar-avg-pts').style.width = Math.min(avgPts / 500 * 100, 100) + '%';
+                    document.getElementById('bar-redeemed').style.width = Math.min((s.totalRedeemed || 0) / (s.totalPoints + (s.totalRedeemed || 0) || 1) * 100, 100) + '%';
+                }, 400);
+
+                // Top Members Table
+                if (s.topMembers && s.topMembers.length) {
+                    document.getElementById('m-top-members').innerHTML = s.topMembers.map((u, i) => `
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="px-8 py-4">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-xs font-black text-slate-300 w-5">${i+1}</span>
+                                    <span class="font-bold text-slate-800">${u.name}</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm text-slate-400 font-semibold">${u.phone}</td>
+                            <td class="px-4 py-4">
+                                <span class="text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full ${u.membershipTier === 'Gold' ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-500'}">${u.membershipTier}</span>
+                            </td>
+                            <td class="px-8 py-4 text-right font-black text-indigo-600">${u.totalPoints.toLocaleString('en-IN')}</td>
+                        </tr>`).join('');
+                } else {
+                    document.getElementById('m-top-members').innerHTML = '<tr><td colspan="4" class="text-center py-10 text-slate-300 font-bold italic">No members yet</td></tr>';
+                }
+
+                notify("Analytics loaded", "success");
+            } catch(e) { notify("Failed to fetch analytics", "warn"); }
         }
     </script>
 </body>
