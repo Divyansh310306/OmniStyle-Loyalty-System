@@ -7,12 +7,21 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// --- TIER HELPER ---
+function assignTier(points) {
+  if (points >= 5000) return 'Diamond';
+  if (points >= 2000) return 'Platinum';
+  if (points >= 500)  return 'Gold';
+  if (points >= 150)  return 'Silver';
+  return 'Bronze';
+}
+
 // --- SCHEMAS ---
 const userSchema = new mongoose.Schema({
   name: String,
   phone: { type: String, unique: true, required: true },
   totalPoints: { type: Number, default: 0 },
-  membershipTier: { type: String, default: 'Bronze' }
+  membershipTier: { type: String, default: 'Bronze' },
   history: [{
     amount: Number,
     points: Number,
@@ -42,7 +51,10 @@ app.post('/api/signup', async (req, res) => {
     if (!name || !name.trim()) {
       return res.status(400).send({ error: "Name is required" });
     }
-    const user = await new User({ phone, name: name.trim() }).save();
+    if (!phone || !phone.trim()) {
+      return res.status(400).send({ error: "Phone number is required" });
+    }
+    const user = await new User({ phone: phone.trim(), name: name.trim() }).save();
     res.status(201).send(user);
   } catch (e) {
     if (e.code === 11000) {
@@ -60,10 +72,17 @@ app.post('/api/login', async (req, res) => {
 // --- STAFF AUTH ---
 app.post('/api/staff/signup', async (req, res) => {
   try {
-    const staff = await new Staff(req.body).save();
+    const { staffID, password, name } = req.body;
+    if (!staffID || !password) {
+      return res.status(400).send({ error: "Staff ID and password are required" });
+    }
+    const staff = await new Staff({ staffID, password, name }).save();
     res.status(201).send(staff);
   } catch (e) {
-    res.status(400).send({ error: "Staff ID already exists" });
+    if (e.code === 11000) {
+      return res.status(400).send({ error: "Staff ID already exists" });
+    }
+    res.status(500).send({ error: "Server error" });
   }
 });
 
@@ -81,13 +100,7 @@ app.post('/api/add-points', async (req, res) => {
     const pts = Math.floor(amount / 10);
     user.totalPoints += pts;
     user.history.unshift({ amount, points: pts, note: "Store Purchase" });
-    function assignTier(points) {
-  if (points >= 5000) return 'Diamond';
-  if (points >= 2000) return 'Platinum';
-  if (points >= 500)  return 'Gold';
-  if (points >= 150)  return 'Silver';
-  return 'Bronze';
-}
+    user.membershipTier = assignTier(user.totalPoints);
     await user.save();
     res.send(user);
   } catch (e) {
@@ -103,6 +116,7 @@ app.post('/api/redeem', async (req, res) => {
     if (user.totalPoints < cost) return res.status(400).send({ error: "Insufficient points" });
     user.totalPoints -= cost;
     user.history.unshift({ amount: 0, points: -cost, note: `Redeemed: ${item}` });
+    user.membershipTier = assignTier(user.totalPoints);
     await user.save();
     res.send(user);
   } catch (e) {
@@ -116,17 +130,19 @@ app.get('/api/admin/stats', async (req, res) => {
     const users = await User.find();
     const totalUsers = users.length;
     const goldMembers = users.filter(u => u.membershipTier === 'Gold').length;
+    const diamondMembers = users.filter(u => u.membershipTier === 'Diamond').length;
+    const platinumMembers = users.filter(u => u.membershipTier === 'Platinum').length;
+    const silverMembers = users.filter(u => u.membershipTier === 'Silver').length;
+    const bronzeMembers = users.filter(u => u.membershipTier === 'Bronze').length;
 
     const totalRevenue = users.reduce((acc, u) =>
       acc + u.history.reduce((hAcc, h) => hAcc + (h.amount || 0), 0), 0);
 
     const totalPoints = users.reduce((acc, u) => acc + u.totalPoints, 0);
 
-    // Sum all redeemed points (negative history entries)
     const totalRedeemed = users.reduce((acc, u) =>
       acc + u.history.reduce((hAcc, h) => hAcc + (h.points < 0 ? Math.abs(h.points) : 0), 0), 0);
 
-    // Top 5 members by points
     const topMembers = [...users]
       .sort((a, b) => b.totalPoints - a.totalPoints)
       .slice(0, 5)
@@ -135,6 +151,10 @@ app.get('/api/admin/stats', async (req, res) => {
     res.send({
       totalUsers,
       goldMembers,
+      diamondMembers,
+      platinumMembers,
+      silverMembers,
+      bronzeMembers,
       silverMembers: totalUsers - goldMembers,
       totalRevenue,
       totalPoints,
@@ -146,4 +166,7 @@ app.get('/api/admin/stats', async (req, res) => {
   }
 });
 
+if (require.main === module) {
+  app.listen(3000, () => console.log('Running on port 3000'));
+}
 module.exports = app;
