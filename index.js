@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema({
   name: String,
   phone: { type: String, unique: true, required: true },
   totalPoints: { type: Number, default: 0 },
-  membershipTier: { type: String, default: 'Silver' },
+  membershipTier: { type: String, default: 'Bronze' }
   history: [{
     amount: Number,
     points: Number,
@@ -81,7 +81,13 @@ app.post('/api/add-points', async (req, res) => {
     const pts = Math.floor(amount / 10);
     user.totalPoints += pts;
     user.history.unshift({ amount, points: pts, note: "Store Purchase" });
-    if (user.totalPoints >= 500) user.membershipTier = 'Gold';
+    function assignTier(points) {
+  if (points >= 5000) return 'Diamond';
+  if (points >= 2000) return 'Platinum';
+  if (points >= 500)  return 'Gold';
+  if (points >= 150)  return 'Silver';
+  return 'Bronze';
+}
     await user.save();
     res.send(user);
   } catch (e) {
