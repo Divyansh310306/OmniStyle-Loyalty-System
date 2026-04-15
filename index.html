@@ -95,15 +95,29 @@
             <p onclick="toggleS()" class="text-center mt-6 text-sm font-semibold text-slate-400 cursor-pointer">Register employee</p>
         </div>
 
-        <div id="s-dash" class="hidden mt-10 space-y-4">
-            <div class="bg-white p-8 rounded-[2.5rem] shadow-lg border border-slate-100">
-                <h2 class="text-xl font-bold mb-6">Process Points</h2>
-                <input id="t-phone" placeholder="Customer Phone" class="w-full bg-slate-50 border-0 p-4 rounded-2xl mb-3">
-                <input id="t-amt" type="number" placeholder="Bill Amount (₹)" class="w-full bg-slate-50 border-0 p-4 rounded-2xl mb-6">
-                <button onclick="addPts()" class="w-full bg-orange-500 text-white py-4 rounded-2xl font-bold">Authorize Transaction</button>
-            </div>
-            <button onclick="location.reload()" class="w-full py-4 text-slate-400 font-bold italic">Sign Out</button>
+       <div id="s-dash" class="hidden mt-10 space-y-4">
+    <div class="bg-white p-8 rounded-[2.5rem] shadow-lg border border-slate-100">
+        <h2 class="text-xl font-bold mb-6">Process Transaction</h2>
+        <input id="t-phone" placeholder="Customer Phone" class="w-full bg-slate-50 border-0 p-4 rounded-2xl mb-3">
+        
+        <div class="space-y-2 mb-6">
+            <input id="t-amt" type="number" placeholder="Bill Amount (₹)" class="w-full bg-slate-50 border-0 p-4 rounded-2xl">
+            <button onclick="addPts()" class="w-full bg-orange-500 text-white py-4 rounded-2xl font-bold shadow-lg shadow-orange-200 hover:bg-orange-600 transition-all">Authorize Points</button>
         </div>
+
+        <div class="relative py-4 flex items-center">
+            <div class="flex-grow border-t border-slate-100"></div>
+            <span class="flex-shrink mx-4 text-slate-300 text-xs font-bold uppercase">OR</span>
+            <div class="flex-grow border-t border-slate-100"></div>
+        </div>
+
+        <div class="space-y-2">
+            <button onclick="redeemPoints()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold hover:bg-black transition-all">Redeem Reward</button>
+            <p class="text-[10px] text-center text-slate-400">Deduct points for store coupons or gifts</p>
+        </div>
+    </div>
+    <button onclick="location.reload()" class="w-full py-4 text-slate-400 font-bold italic">Sign Out</button>
+</div>
     </div>
 
     <script>
