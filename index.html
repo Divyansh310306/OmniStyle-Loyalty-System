@@ -406,19 +406,32 @@
         }
 
         // ── CUSTOMER AUTH ──
-        async function handleUAuth() {
-            const phone = document.getElementById('u-phone').value.trim();
-            const name = document.getElementById('u-name').value.trim();
-            if (!phone) { notify("Please enter your phone number", "warn"); return; }
-            try {
-                const res = await fetch(uMode === 'login' ? '/api/login' : '/api/signup', {
-                    method: 'POST', headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ phone, name })
-                });
-                if (res.ok) { const user = await res.json(); renderUser(user); notify(`Welcome, ${user.name}!`, 'success'); }
-                else { const err = await res.json(); notify(err.error || "Authentication failed", 'warn'); }
-            } catch(e) { notify("Connection error", 'warn'); }
+      async function handleUAuth() {
+    const phone = document.getElementById('u-phone').value.trim();
+    const name = document.getElementById('u-name').value.trim();
+    if (!phone) { notify("Please enter your phone number", "warn"); return; }
+    if (uMode === 'signup' && !name) { notify("Please enter your name", "warn"); return; }
+    try {
+        const res = await fetch(uMode === 'login' ? '/api/login' : '/api/signup', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ phone, name })
+        });
+        if (res.ok) { 
+            const user = await res.json(); 
+            renderUser(user); 
+            notify(`Welcome, ${user.name}!`, 'success'); 
+        } else { 
+            const err = await res.json(); 
+            notify(err.error || "Authentication failed", 'warn');
+            if (uMode === 'signup' && err.error?.includes('already registered')) {
+                uMode = 'login';
+                document.getElementById('u-signup-box').classList.add('hidden');
+                document.getElementById('u-btn').innerText = 'Sign In';
+                notify("Switching to sign-in — tap Sign In to continue", "info");
+            }
         }
+    } catch(e) { notify("Connection error", 'warn'); }
+}
 
         function renderUser(user) {
             document.getElementById('u-auth').classList.add('hidden');
