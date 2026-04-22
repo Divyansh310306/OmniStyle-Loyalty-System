@@ -18,7 +18,7 @@ function assignTier(points) {
 
 // --- SCHEMAS ---
 const userSchema = new mongoose.Schema({
-  name: String,
+  name: { type: String, required: true },
   phone: { type: String, unique: true, required: true },
   totalPoints: { type: Number, default: 0 },
   membershipTier: { type: String, default: 'Bronze' },
@@ -49,24 +49,43 @@ app.post('/api/signup', async (req, res) => {
   try {
     const { phone, name } = req.body;
     if (!name || !name.trim()) {
-      return res.status(400).send({ error: "Name is required" });
+      return res.status(400).json({ error: "Name is required" });
     }
     if (!phone || !phone.trim()) {
-      return res.status(400).send({ error: "Phone number is required" });
+      return res.status(400).json({ error: "Phone number is required" });
     }
-    const user = await new User({ phone: phone.trim(), name: name.trim() }).save();
-    res.status(201).send(user);
+    // Check if already exists before trying to save
+    const existing = await User.findOne({ phone: phone.trim() });
+    if (existing) {
+      return res.status(400).json({ error: "Phone already registered. Please sign in instead." });
+    }
+    const user = new User({
+      phone: phone.trim(),
+      name: name.trim(),
+      totalPoints: 0,
+      membershipTier: 'Bronze',
+      history: []
+    });
+    await user.save();
+    res.status(201).json(user);
   } catch (e) {
     if (e.code === 11000) {
-      return res.status(400).send({ error: "Phone already registered. Please sign in instead." });
+      return res.status(400).json({ error: "Phone already registered. Please sign in instead." });
     }
-    res.status(500).send({ error: "Server error" });
+    console.error('Signup error:', e);
+    res.status(500).json({ error: "Server error: " + e.message });
   }
 });
 
 app.post('/api/login', async (req, res) => {
-  const user = await User.findOne({ phone: req.body.phone });
-  user ? res.send(user) : res.status(404).send({ error: "Member not found" });
+  try {
+    const { phone } = req.body;
+    if (!phone) return res.status(400).json({ error: "Phone number is required" });
+    const user = await User.findOne({ phone: phone.trim() });
+    user ? res.json(user) : res.status(404).json({ error: "Member not found" });
+  } catch (e) {
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
 // --- STAFF AUTH ---
@@ -74,53 +93,66 @@ app.post('/api/staff/signup', async (req, res) => {
   try {
     const { staffID, password, name } = req.body;
     if (!staffID || !password) {
-      return res.status(400).send({ error: "Staff ID and password are required" });
+      return res.status(400).json({ error: "Staff ID and password are required" });
+    }
+    const existing = await Staff.findOne({ staffID });
+    if (existing) {
+      return res.status(400).json({ error: "Staff ID already exists" });
     }
     const staff = await new Staff({ staffID, password, name }).save();
-    res.status(201).send(staff);
+    res.status(201).json(staff);
   } catch (e) {
     if (e.code === 11000) {
-      return res.status(400).send({ error: "Staff ID already exists" });
+      return res.status(400).json({ error: "Staff ID already exists" });
     }
-    res.status(500).send({ error: "Server error" });
+    res.status(500).json({ error: "Server error" });
   }
 });
 
 app.post('/api/staff/login', async (req, res) => {
-  const staff = await Staff.findOne({ staffID: req.body.staffID, password: req.body.password });
-  staff ? res.send(staff) : res.status(401).send({ error: "Invalid credentials" });
+  try {
+    const staff = await Staff.findOne({ staffID: req.body.staffID, password: req.body.password });
+    staff ? res.json(staff) : res.status(401).json({ error: "Invalid credentials" });
+  } catch (e) {
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
 // --- LOYALTY ENGINE ---
 app.post('/api/add-points', async (req, res) => {
   const { phone, amount } = req.body;
   try {
-    const user = await User.findOne({ phone });
-    if (!user) return res.status(404).send({ error: "User not found" });
-    const pts = Math.floor(amount / 10);
+    const user = await User.findOne({ phone: phone.trim() });
+    if (!user) return res.status(404).json({ error: "User not found" });
+    const pts = Math.floor(Number(amount) / 10);
+    const oldTier = user.membershipTier;
     user.totalPoints += pts;
-    user.history.unshift({ amount, points: pts, note: "Store Purchase" });
     user.membershipTier = assignTier(user.totalPoints);
+    user.history.unshift({ amount: Number(amount), points: pts, note: "Store Purchase" });
     await user.save();
-    res.send(user);
+    // Return old tier so frontend can detect upgrade
+    const result = user.toObject();
+    result.previousTier = oldTier;
+    res.json(result);
   } catch (e) {
-    res.status(500).send({ error: "Server error" });
+    console.error('Add points error:', e);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
 app.post('/api/redeem', async (req, res) => {
   const { phone, cost, item } = req.body;
   try {
-    const user = await User.findOne({ phone });
-    if (!user) return res.status(404).send({ error: "User not found" });
-    if (user.totalPoints < cost) return res.status(400).send({ error: "Insufficient points" });
+    const user = await User.findOne({ phone: phone.trim() });
+    if (!user) return res.status(404).json({ error: "User not found" });
+    if (user.totalPoints < cost) return res.status(400).json({ error: "Insufficient points" });
     user.totalPoints -= cost;
-    user.history.unshift({ amount: 0, points: -cost, note: `Redeemed: ${item}` });
     user.membershipTier = assignTier(user.totalPoints);
+    user.history.unshift({ amount: 0, points: -cost, note: `Redeemed: ${item}` });
     await user.save();
-    res.send(user);
+    res.json(user);
   } catch (e) {
-    res.status(500).send({ error: "Server error" });
+    res.status(500).json({ error: "Server error" });
   }
 });
 
@@ -129,11 +161,13 @@ app.get('/api/admin/stats', async (req, res) => {
   try {
     const users = await User.find();
     const totalUsers = users.length;
-    const goldMembers = users.filter(u => u.membershipTier === 'Gold').length;
-    const diamondMembers = users.filter(u => u.membershipTier === 'Diamond').length;
+
+    // FIX: no duplicate keys — each tier counted separately
+    const bronzeMembers   = users.filter(u => u.membershipTier === 'Bronze').length;
+    const silverMembers   = users.filter(u => u.membershipTier === 'Silver').length;
+    const goldMembers     = users.filter(u => u.membershipTier === 'Gold').length;
     const platinumMembers = users.filter(u => u.membershipTier === 'Platinum').length;
-    const silverMembers = users.filter(u => u.membershipTier === 'Silver').length;
-    const bronzeMembers = users.filter(u => u.membershipTier === 'Bronze').length;
+    const diamondMembers  = users.filter(u => u.membershipTier === 'Diamond').length;
 
     const totalRevenue = users.reduce((acc, u) =>
       acc + u.history.reduce((hAcc, h) => hAcc + (h.amount || 0), 0), 0);
@@ -148,21 +182,21 @@ app.get('/api/admin/stats', async (req, res) => {
       .slice(0, 5)
       .map(u => ({ name: u.name, phone: u.phone, totalPoints: u.totalPoints, membershipTier: u.membershipTier }));
 
-    res.send({
+    res.json({
       totalUsers,
-      goldMembers,
-      diamondMembers,
-      platinumMembers,
-      silverMembers,
       bronzeMembers,
-      silverMembers: totalUsers - goldMembers,
+      silverMembers,
+      goldMembers,
+      platinumMembers,
+      diamondMembers,
       totalRevenue,
       totalPoints,
       totalRedeemed,
       topMembers
     });
   } catch (e) {
-    res.status(500).send({ error: "Analytics error" });
+    console.error('Analytics error:', e);
+    res.status(500).json({ error: "Analytics error" });
   }
 });
 
