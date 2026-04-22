@@ -41,10 +41,13 @@ const Staff = mongoose.model('Staff', staffSchema);
 mongoose.connect(process.env.MONGO_URI)
   .then(async () => {
     console.log("MongoDB connected");
-    // Drop and rebuild stale indexes
-    await User.syncIndexes();
-    await Staff.syncIndexes();
-    console.log("Indexes synced");
+    try {
+      await User.syncIndexes();
+      await Staff.syncIndexes();
+      console.log("Indexes synced");
+    } catch (e) {
+      console.error("Index sync error:", e.message);
+    }
   })
   .catch(err => console.error("DB Error:", err));
   .then(() => console.log("MongoDB connected"))
