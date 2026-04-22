@@ -34,7 +34,6 @@
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 
-        /* Tier badge colours */
         .badge-bronze   { background: #fdf0e6; color: #a0522d; }
         .badge-silver   { background: #f1f5f9; color: #475569; }
         .badge-gold     { background: #fef3c7; color: #d97706; }
@@ -44,10 +43,9 @@
 </head>
 <body class="bg-[#F8FAFC] text-slate-900 min-h-screen">
 
-    <!-- NOTIFICATION CONTAINER -->
     <div id="notification-container" class="fixed top-6 right-6 z-[100] flex flex-col gap-3 w-80"></div>
 
-    <!-- ═══════════════════════════════════════ LANDING ═══════════════════════════════════════ -->
+    <!-- ═══════════════════════════ LANDING ═══════════════════════════ -->
     <div id="landing" class="max-w-md mx-auto pt-32 px-6">
         <div class="text-center mb-12">
             <h1 class="text-5xl font-extrabold tracking-tighter text-indigo-600 mb-2">OmniStyle</h1>
@@ -78,7 +76,7 @@
         </div>
     </div>
 
-    <!-- ═══════════════════════════════════════ CUSTOMER ═══════════════════════════════════════ -->
+    <!-- ═══════════════════════════ CUSTOMER ═══════════════════════════ -->
     <div id="user-sec" class="hidden max-w-lg mx-auto p-6">
         <div id="u-auth" class="bg-white p-10 rounded-[2.5rem] shadow-xl shadow-slate-200/50 mt-10">
             <h2 class="text-3xl font-bold mb-2">Welcome back</h2>
@@ -93,7 +91,6 @@
         </div>
 
         <div id="u-dash" class="hidden space-y-6 mt-4">
-            <!-- Tier Card -->
             <div id="tier-card" class="tier-bronze p-8 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden fade-up">
                 <div class="relative z-10">
                     <div class="flex justify-between items-start mb-12">
@@ -122,20 +119,17 @@
                 <div class="absolute -left-6 -top-6 w-32 h-32 bg-white/5 rounded-full blur-2xl"></div>
             </div>
 
-            <!-- Tier Ladder -->
             <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
                 <h3 class="font-bold text-lg mb-5">Membership Tiers</h3>
                 <div class="space-y-3" id="tier-ladder"></div>
             </div>
 
-            <!-- QR Code -->
             <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col items-center">
                 <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Your Scan Code</p>
                 <div id="qrcode" class="p-3 border-4 border-slate-50 rounded-2xl"></div>
                 <p class="text-[10px] text-slate-300 font-bold mt-3 uppercase tracking-widest">Show at checkout</p>
             </div>
 
-            <!-- History -->
             <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
                 <h3 class="font-bold text-lg mb-6">Recent Activity</h3>
                 <div id="u-hist" class="space-y-3"></div>
@@ -143,7 +137,7 @@
         </div>
     </div>
 
-    <!-- ═══════════════════════════════════════ STAFF ═══════════════════════════════════════ -->
+    <!-- ═══════════════════════════ STAFF ═══════════════════════════ -->
     <div id="staff-sec" class="hidden max-w-md mx-auto p-6">
         <div id="s-auth" class="bg-white p-10 rounded-[2.5rem] shadow-xl mt-10 border-t-[10px] border-orange-500">
             <h2 class="text-3xl font-bold mb-2 text-slate-800">Staff Desk</h2>
@@ -158,16 +152,13 @@
             <button onclick="navTo('landing-back')" class="w-full mt-3 py-3 text-slate-300 font-bold text-sm">← Back</button>
         </div>
 
-        <!-- STAFF DASHBOARD -->
         <div id="s-dash" class="hidden mt-6 space-y-4 pb-10">
-            <!-- Staff Tab Bar -->
             <div class="bg-white rounded-[1.5rem] p-2 flex gap-2 shadow-sm border border-slate-100">
                 <button onclick="switchStaffTab('scan')" id="tab-scan" class="staff-tab-btn flex-1 py-3 rounded-xl text-sm font-bold tab-active">📷 Scan QR</button>
                 <button onclick="switchStaffTab('points')" id="tab-points" class="staff-tab-btn flex-1 py-3 rounded-xl text-sm font-bold tab-inactive">✚ Points</button>
                 <button onclick="switchStaffTab('redeem')" id="tab-redeem" class="staff-tab-btn flex-1 py-3 rounded-xl text-sm font-bold tab-inactive">🎁 Redeem</button>
             </div>
 
-            <!-- CUSTOMER PROFILE -->
             <div id="s-customer-profile" class="hidden bg-indigo-50 border border-indigo-100 p-6 rounded-[2rem] fade-up">
                 <div class="flex items-center justify-between mb-4">
                     <div>
@@ -187,7 +178,6 @@
                 </div>
             </div>
 
-            <!-- TAB: QR SCAN -->
             <div id="panel-scan" class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
                 <h3 class="font-bold text-lg mb-2">Scan Customer QR</h3>
                 <p class="text-sm text-slate-400 mb-5">Point camera at customer's loyalty QR code</p>
@@ -203,7 +193,6 @@
                 </div>
             </div>
 
-            <!-- TAB: ADD POINTS -->
             <div id="panel-points" class="hidden bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
                 <h3 class="font-bold text-lg mb-5">Add Points</h3>
                 <input id="t-phone" placeholder="Customer Phone (auto-filled from scan)" class="w-full bg-slate-50 border-0 p-4 rounded-2xl mb-3 outline-none text-sm">
@@ -212,12 +201,10 @@
                 <button onclick="addPts()" class="w-full bg-orange-500 text-white py-4 rounded-2xl font-bold shadow-lg shadow-orange-100 hover:bg-orange-600 transition-all">Authorize Transaction</button>
             </div>
 
-            <!-- TAB: REDEEM -->
             <div id="panel-redeem" class="hidden bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
                 <h3 class="font-bold text-lg mb-2">Redeem Points</h3>
                 <p class="text-sm text-slate-400 mb-6">Apply a reward for the active customer</p>
                 <input id="r-phone" placeholder="Customer Phone (auto-filled from scan)" class="w-full bg-slate-50 border-0 p-4 rounded-2xl mb-3 outline-none text-sm">
-
                 <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Select Reward</p>
                 <div class="grid grid-cols-2 gap-3 mb-5" id="reward-presets">
                     <button onclick="selectReward(this, '10% Discount', 50)" class="reward-btn border-2 border-slate-100 p-4 rounded-2xl text-left hover:border-indigo-400 transition-all">
@@ -237,18 +224,15 @@
                         <p class="text-xs text-indigo-600 font-bold mt-1">300 pts</p>
                     </button>
                 </div>
-
                 <div class="border-t border-slate-100 pt-4 mb-5">
                     <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Or Custom Reward</p>
                     <input id="r-item" placeholder="Reward name" class="w-full bg-slate-50 border-0 p-3 rounded-xl mb-2 outline-none text-sm">
                     <input id="r-cost" type="number" placeholder="Point cost" class="w-full bg-slate-50 border-0 p-3 rounded-xl outline-none text-sm">
                 </div>
-
                 <div id="r-summary" class="hidden bg-indigo-50 border border-indigo-100 p-4 rounded-2xl mb-4">
                     <p class="text-xs font-black text-indigo-400 uppercase tracking-widest mb-1">Selected Reward</p>
                     <p id="r-summary-text" class="font-bold text-slate-800"></p>
                 </div>
-
                 <button onclick="redeemPts()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold hover:bg-black transition-all">Apply Redemption</button>
             </div>
 
@@ -256,7 +240,7 @@
         </div>
     </div>
 
-    <!-- ═══════════════════════════════════════ MANAGER ═══════════════════════════════════════ -->
+    <!-- ═══════════════════════════ MANAGER ═══════════════════════════ -->
     <div id="manager-sec" class="hidden max-w-5xl mx-auto p-6 pb-20 mt-6">
         <div class="flex justify-between items-center mb-8 px-2">
             <div>
@@ -269,7 +253,6 @@
             </div>
         </div>
 
-        <!-- KPI Cards -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div class="stat-card bg-white p-6 rounded-[1.75rem] border border-slate-100 shadow-sm">
                 <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Total Members</p>
@@ -293,18 +276,13 @@
             </div>
         </div>
 
-        <!-- Tier Breakdown Row -->
         <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm mb-4">
             <h3 class="font-bold text-slate-800 mb-1">Tier Distribution</h3>
             <p class="text-xs text-slate-400 font-semibold mb-6">All membership levels</p>
-            <div class="grid grid-cols-5 gap-3" id="tier-distribution">
-                <!-- filled by JS -->
-            </div>
+            <div class="grid grid-cols-5 gap-3" id="tier-distribution"></div>
         </div>
 
-        <!-- Charts Row -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <!-- Bar Chart -->
             <div class="bg-slate-900 p-8 rounded-[2.5rem] text-white shadow-2xl">
                 <h3 class="font-bold mb-1 text-white">Gold vs Diamond</h3>
                 <p class="text-xs text-slate-400 font-semibold mb-8">Premium tier breakdown</p>
@@ -335,7 +313,6 @@
                 </div>
             </div>
 
-            <!-- Key Metrics -->
             <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
                 <h3 class="font-bold text-slate-800 mb-1">Key Metrics</h3>
                 <p class="text-xs text-slate-400 font-semibold mb-6">Performance indicators</p>
@@ -380,7 +357,6 @@
             </div>
         </div>
 
-        <!-- Top Members Table -->
         <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
             <div class="p-8 pb-4">
                 <h3 class="font-bold text-lg text-slate-800">Top Members</h3>
@@ -422,7 +398,6 @@
             return TIERS.find(t => t.name === tierName) || TIERS[0];
         }
 
-        // ── NAVIGATION ──
         function navTo(v) {
             if (v === 'landing-back') { location.reload(); return; }
             document.getElementById('landing').classList.add('hidden');
@@ -430,7 +405,6 @@
             if (v === 'manager') loadAnalytics();
         }
 
-        // ── NOTIFICATIONS ──
         function notify(message, type = 'info') {
             const container = document.getElementById('notification-container');
             const toast = document.createElement('div');
@@ -441,19 +415,18 @@
             setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.5s'; setTimeout(() => toast.remove(), 500); }, 6000);
         }
 
-        // ── TOGGLE AUTH MODES ──
         function toggleU() {
             uMode = uMode === 'login' ? 'signup' : 'login';
             document.getElementById('u-signup-box').classList.toggle('hidden');
             document.getElementById('u-btn').innerText = uMode === 'login' ? 'Sign In' : 'Create Account';
         }
+
         function toggleS() {
             sMode = sMode === 'login' ? 'signup' : 'login';
             document.getElementById('s-signup-box').classList.toggle('hidden');
             document.getElementById('s-btn').innerText = sMode === 'login' ? 'Login' : 'Register Staff';
         }
 
-        // ── CUSTOMER AUTH ──
         async function handleUAuth() {
             const phone = document.getElementById('u-phone').value.trim();
             const name = document.getElementById('u-name').value.trim();
@@ -471,7 +444,7 @@
                 } else {
                     const err = await res.json();
                     notify(err.error || "Authentication failed", 'warn');
-                    if (uMode === 'signup' && err.error?.includes('already registered')) {
+                    if (uMode === 'signup' && err.error && err.error.includes('already registered')) {
                         uMode = 'login';
                         document.getElementById('u-signup-box').classList.add('hidden');
                         document.getElementById('u-btn').innerText = 'Sign In';
@@ -481,7 +454,7 @@
             } catch (e) { notify("Connection error", 'warn'); }
         }
 
-        // ── RENDER USER DASHBOARD ──
+        // FIX: standalone renderUser — updates card gradient, progress bar, ladder all in one place
         function renderUser(user) {
             document.getElementById('u-auth').classList.add('hidden');
             document.getElementById('u-dash').classList.remove('hidden');
@@ -489,10 +462,11 @@
             document.getElementById('disp-pts').innerText = user.totalPoints;
             document.getElementById('disp-tier').innerText = user.membershipTier + " Member";
 
+            // Update tier card gradient
             const tierInfo = getTierInfo(user.membershipTier);
-            const card = document.getElementById('tier-card');
-            card.style.background = tierInfo.color;
+            document.getElementById('tier-card').style.background = tierInfo.color;
 
+            // Update progress bar
             const progressWrap = document.getElementById('tier-progress-wrap');
             if (user.membershipTier === 'Diamond') {
                 progressWrap.classList.add('hidden');
@@ -506,14 +480,13 @@
                 document.getElementById('progress-next-label').innerText = `Progress to ${tierInfo.next}`;
             }
 
-            // Tier Ladder
-            const ladder = document.getElementById('tier-ladder');
-            ladder.innerHTML = TIERS.map(t => {
+            // Tier ladder
+            document.getElementById('tier-ladder').innerHTML = TIERS.map(t => {
                 const isActive = t.name === user.membershipTier;
                 const isUnlocked = user.totalPoints >= t.min;
                 return `
                 <div class="flex items-center gap-4 p-4 rounded-2xl transition-all ${isActive ? 'bg-slate-900 text-white' : isUnlocked ? 'bg-slate-50' : 'bg-slate-50 opacity-40'}">
-                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-lg font-black" style="background:${t.color}">${t.emoji}</div>
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-lg" style="background:${t.color}">${t.emoji}</div>
                     <div class="flex-1">
                         <p class="font-black text-sm ${isActive ? 'text-white' : 'text-slate-700'}">${t.name}</p>
                         <p class="text-xs ${isActive ? 'text-slate-300' : 'text-slate-400'}">${t.min === 0 ? '0' : t.min.toLocaleString('en-IN')}${t.next ? ' – ' + t.max.toLocaleString('en-IN') + ' pts' : '+ pts'}</p>
@@ -522,7 +495,7 @@
                 </div>`;
             }).join('');
 
-            // QR Code
+            // QR code
             document.getElementById('qrcode').innerHTML = '';
             new QRCode(document.getElementById("qrcode"), {
                 text: user.phone, width: 180, height: 180,
@@ -550,7 +523,6 @@
             }
         }
 
-        // ── STAFF AUTH ──
         async function handleSAuth() {
             const staffID = document.getElementById('s-id').value.trim();
             const password = document.getElementById('s-pass').value;
@@ -565,11 +537,13 @@
                     document.getElementById('s-auth').classList.add('hidden');
                     document.getElementById('s-dash').classList.remove('hidden');
                     notify("Staff session active", 'info');
-                } else notify("Invalid credentials", 'warn');
+                } else {
+                    const err = await res.json();
+                    notify(err.error || "Invalid credentials", 'warn');
+                }
             } catch (e) { notify("Connection error", 'warn'); }
         }
 
-        // ── STAFF TABS ──
         function switchStaffTab(tab) {
             ['scan', 'points', 'redeem'].forEach(t => {
                 document.getElementById('tab-' + t).className = `staff-tab-btn flex-1 py-3 rounded-xl text-sm font-bold ${t === tab ? 'tab-active' : 'tab-inactive'}`;
@@ -578,7 +552,6 @@
             if (tab !== 'scan') stopScanner();
         }
 
-        // ── QR SCANNER ──
         async function startScanner() {
             document.getElementById('scan-btn').classList.add('hidden');
             document.getElementById('stop-btn').classList.remove('hidden');
@@ -651,7 +624,6 @@
             document.getElementById('r-phone').value = '';
         }
 
-        // ── POINTS PREVIEW ──
         document.addEventListener('DOMContentLoaded', () => {
             const amtInput = document.getElementById('t-amt');
             if (amtInput) {
@@ -662,11 +634,14 @@
             }
         });
 
-        // ── ADD POINTS ──
         async function addPts() {
             const phone = document.getElementById('t-phone').value.trim();
             const amount = document.getElementById('t-amt').value;
             if (!phone || !amount) { notify("Fill in customer phone and bill amount", "warn"); return; }
+
+            // FIX: capture old tier BEFORE the API call, not after
+            const previousTier = activeCustomer ? activeCustomer.membershipTier : null;
+
             try {
                 const res = await fetch('/api/add-points', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -677,17 +652,25 @@
                     notify(`✅ +${Math.floor(amount / 10)} pts added for ${updated.name}`, 'success');
                     document.getElementById('t-amt').value = '';
                     document.getElementById('pts-preview').innerText = '0 pts';
-                    if (activeCustomer && activeCustomer.phone === phone) showCustomerProfile(updated);
-                    // Tier upgrade notification
-                    if (updated.membershipTier !== activeCustomer?.membershipTier) {
+
+                    // FIX: update profile first, then compare tiers correctly
+                    if (activeCustomer && activeCustomer.phone === phone) {
+                        showCustomerProfile(updated);
+                    }
+
+                    // FIX: use previousTier captured before the call, or use backend's previousTier field
+                    const oldTier = updated.previousTier || previousTier;
+                    if (oldTier && updated.membershipTier !== oldTier) {
                         const tierInfo = getTierInfo(updated.membershipTier);
                         setTimeout(() => notify(`${tierInfo.emoji} Customer upgraded to ${updated.membershipTier} Tier!`, 'gold'), 800);
                     }
-                } else notify("Customer not found", 'warn');
+                } else {
+                    const err = await res.json();
+                    notify(err.error || "Failed to add points", 'warn');
+                }
             } catch (e) { notify("Connection error", 'warn'); }
         }
 
-        // ── REWARD SELECTION ──
         function selectReward(btn, item, cost) {
             document.querySelectorAll('.reward-btn').forEach(b => b.classList.remove('border-indigo-500', 'bg-indigo-50'));
             btn.classList.add('border-indigo-500', 'bg-indigo-50');
@@ -699,7 +682,6 @@
             document.getElementById('r-summary-text').innerText = `${item} — ${cost} points`;
         }
 
-        // ── REDEEM POINTS ──
         async function redeemPts() {
             const phone = document.getElementById('r-phone').value.trim();
             const customItem = document.getElementById('r-item').value.trim();
@@ -723,11 +705,13 @@
                     document.getElementById('r-item').value = '';
                     document.getElementById('r-cost').value = '';
                     if (activeCustomer && activeCustomer.phone === phone) showCustomerProfile(updated);
-                } else notify("Insufficient points or customer not found", 'warn');
+                } else {
+                    const err = await res.json();
+                    notify(err.error || "Redemption failed", 'warn');
+                }
             } catch (e) { notify("Connection error", 'warn'); }
         }
 
-        // ── ANALYTICS ──
         async function loadAnalytics() {
             try {
                 const res = await fetch('/api/admin/stats');
@@ -739,7 +723,6 @@
                 document.getElementById('m-diamond').innerText = s.diamondMembers || 0;
                 document.getElementById('m-pts').innerText = (s.totalPoints || 0).toLocaleString('en-IN');
 
-                // Tier distribution cards
                 const tierDist = [
                     { name: 'Bronze',   count: s.bronzeMembers || 0,   badge: 'badge-bronze',   emoji: '🥉' },
                     { name: 'Silver',   count: s.silverMembers || 0,   badge: 'badge-silver',   emoji: '🥈' },
@@ -785,7 +768,6 @@
                     document.getElementById('bar-redeemed').style.width = Math.min((s.totalRedeemed || 0) / (s.totalPoints + (s.totalRedeemed || 0) || 1) * 100, 100) + '%';
                 }, 400);
 
-                // Top Members Table
                 if (s.topMembers && s.topMembers.length) {
                     document.getElementById('m-top-members').innerHTML = s.topMembers.map((u, i) => {
                         const tierInfo = getTierInfo(u.membershipTier);
