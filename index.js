@@ -39,7 +39,6 @@ const staffSchema = new mongoose.Schema({
 const Staff = mongoose.model('Staff', staffSchema);
 
 mongoose.connect(process.env.MONGO_URI)
-  mongoose.connect(process.env.MONGO_URI)
   .then(async () => {
     console.log("MongoDB connected");
     // Drop and rebuild stale indexes
