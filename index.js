@@ -38,6 +38,7 @@ const staffSchema = new mongoose.Schema({
 });
 const Staff = mongoose.model('Staff', staffSchema);
 
+// --- DB CONNECTION (single block, no duplicates) ---
 mongoose.connect(process.env.MONGO_URI)
   .then(async () => {
     console.log("MongoDB connected");
@@ -49,8 +50,6 @@ mongoose.connect(process.env.MONGO_URI)
       console.error("Index sync error:", e.message);
     }
   })
-  .catch(err => console.error("DB Error:", err));
-  .then(() => console.log("MongoDB connected"))
   .catch(err => console.error("DB Error:", err));
 
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
@@ -65,7 +64,6 @@ app.post('/api/signup', async (req, res) => {
     if (!phone || !phone.trim()) {
       return res.status(400).json({ error: "Phone number is required" });
     }
-    // Check if already exists before trying to save
     const existing = await User.findOne({ phone: phone.trim() });
     if (existing) {
       return res.status(400).json({ error: "Phone already registered. Please sign in instead." });
@@ -80,21 +78,22 @@ app.post('/api/signup', async (req, res) => {
     await user.save();
     res.status(201).json(user);
   } catch (e) {
+    console.error('Signup error:', e.message, e.code);
     if (e.code === 11000) {
       return res.status(400).json({ error: "Phone already registered. Please sign in instead." });
     }
-    console.error('Signup error:', e);
     res.status(500).json({ error: "Server error: " + e.message });
   }
 });
 
 app.post('/api/login', async (req, res) => {
   try {
-    const { phone } = req.body;
+    const phone = req.body.phone ? req.body.phone.trim() : '';
     if (!phone) return res.status(400).json({ error: "Phone number is required" });
-    const user = await User.findOne({ phone: phone.trim() });
+    const user = await User.findOne({ phone });
     user ? res.json(user) : res.status(404).json({ error: "Member not found" });
   } catch (e) {
+    console.error('Login error:', e.message);
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -113,6 +112,7 @@ app.post('/api/staff/signup', async (req, res) => {
     const staff = await new Staff({ staffID, password, name }).save();
     res.status(201).json(staff);
   } catch (e) {
+    console.error('Staff signup error:', e.message);
     if (e.code === 11000) {
       return res.status(400).json({ error: "Staff ID already exists" });
     }
@@ -125,14 +125,16 @@ app.post('/api/staff/login', async (req, res) => {
     const staff = await Staff.findOne({ staffID: req.body.staffID, password: req.body.password });
     staff ? res.json(staff) : res.status(401).json({ error: "Invalid credentials" });
   } catch (e) {
+    console.error('Staff login error:', e.message);
     res.status(500).json({ error: "Server error" });
   }
 });
 
 // --- LOYALTY ENGINE ---
 app.post('/api/add-points', async (req, res) => {
-  const { phone, amount } = req.body;
   try {
+    const { phone, amount } = req.body;
+    if (!phone || !amount) return res.status(400).json({ error: "Phone and amount are required" });
     const user = await User.findOne({ phone: phone.trim() });
     if (!user) return res.status(404).json({ error: "User not found" });
     const pts = Math.floor(Number(amount) / 10);
@@ -141,19 +143,19 @@ app.post('/api/add-points', async (req, res) => {
     user.membershipTier = assignTier(user.totalPoints);
     user.history.unshift({ amount: Number(amount), points: pts, note: "Store Purchase" });
     await user.save();
-    // Return old tier so frontend can detect upgrade
     const result = user.toObject();
     result.previousTier = oldTier;
     res.json(result);
   } catch (e) {
-    console.error('Add points error:', e);
+    console.error('Add points error:', e.message);
     res.status(500).json({ error: "Server error" });
   }
 });
 
 app.post('/api/redeem', async (req, res) => {
-  const { phone, cost, item } = req.body;
   try {
+    const { phone, cost, item } = req.body;
+    if (!phone || !cost || !item) return res.status(400).json({ error: "Phone, cost and item are required" });
     const user = await User.findOne({ phone: phone.trim() });
     if (!user) return res.status(404).json({ error: "User not found" });
     if (user.totalPoints < cost) return res.status(400).json({ error: "Insufficient points" });
@@ -163,6 +165,7 @@ app.post('/api/redeem', async (req, res) => {
     await user.save();
     res.json(user);
   } catch (e) {
+    console.error('Redeem error:', e.message);
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -173,7 +176,6 @@ app.get('/api/admin/stats', async (req, res) => {
     const users = await User.find();
     const totalUsers = users.length;
 
-    // FIX: no duplicate keys — each tier counted separately
     const bronzeMembers   = users.filter(u => u.membershipTier === 'Bronze').length;
     const silverMembers   = users.filter(u => u.membershipTier === 'Silver').length;
     const goldMembers     = users.filter(u => u.membershipTier === 'Gold').length;
@@ -206,7 +208,7 @@ app.get('/api/admin/stats', async (req, res) => {
       topMembers
     });
   } catch (e) {
-    console.error('Analytics error:', e);
+    console.error('Analytics error:', e.message);
     res.status(500).json({ error: "Analytics error" });
   }
 });
